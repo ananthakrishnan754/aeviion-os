@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from "react"
 import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import { cn } from "@/lib/utils"
+import { createClient } from "@/lib/supabase/client"
 import {
   LayoutDashboard,
   Users,
@@ -142,8 +143,16 @@ const navigation: NavItem[] = [
 
 export function Sidebar() {
   const pathname = usePathname()
+  const router = useRouter()
   const [openItems, setOpenItems] = useState<string[]>([])
   const [mobileOpen, setMobileOpen] = useState(false)
+
+  const handleLogout = async () => {
+    const supabase = createClient()
+    await supabase.auth.signOut()
+    router.push("/login")
+    router.refresh()
+  }
 
   // Auto-expand active section
   useEffect(() => {
@@ -278,7 +287,10 @@ export function Sidebar() {
                 CEO & Founder
               </p>
             </div>
-            <button className="rounded-lg p-1.5 text-[var(--muted-foreground)] hover:bg-[var(--background-subtle)] hover:text-[var(--foreground)]">
+            <button
+              onClick={handleLogout}
+              className="rounded-lg p-1.5 text-[var(--muted-foreground)] hover:bg-[var(--background-subtle)] hover:text-[var(--foreground)]"
+            >
               <LogOut className="h-4 w-4" />
             </button>
           </div>
@@ -297,7 +309,15 @@ export function Sidebar() {
 }
 
 export function Header() {
+  const router = useRouter()
   const [searchFocused, setSearchFocused] = useState(false)
+
+  const handleLogout = async () => {
+    const supabase = createClient()
+    await supabase.auth.signOut()
+    router.push("/login")
+    router.refresh()
+  }
 
   return (
     <header className="sticky top-0 z-30 flex h-[72px] items-center justify-between border-b border-[var(--border-subtle)] bg-[var(--background)]/80 px-6 backdrop-blur-xl">
@@ -347,6 +367,15 @@ export function Header() {
           <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-[var(--primary)] to-[#B85C3A] text-xs font-semibold text-white shadow-sm">
             AK
           </div>
+        </button>
+
+        {/* Logout */}
+        <button
+          onClick={handleLogout}
+          className="rounded-xl p-2.5 text-[var(--muted-foreground)] hover:bg-[var(--secondary)] hover:text-[var(--foreground)]"
+          title="Logout"
+        >
+          <LogOut className="h-[18px] w-[18px]" />
         </button>
       </div>
     </header>
