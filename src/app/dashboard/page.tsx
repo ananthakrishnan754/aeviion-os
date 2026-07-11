@@ -1,5 +1,6 @@
 "use client"
 
+import Link from "next/link"
 import { AppLayout } from "@/components/layout/AppLayout"
 import {
   Users,
@@ -133,10 +134,10 @@ const topStudents = [
 ]
 
 const quickActions = [
-  { label: "Create Event", icon: Calendar, color: "from-[#4A7DC9] to-[#3A6DB9]" },
-  { label: "Add Student", icon: Users, color: "from-[#3D8B5E] to-[#2D6B4E]" },
-  { label: "Issue Certificate", icon: Award, color: "from-[#D4964E] to-[#B87A3A]" },
-  { label: "View Analytics", icon: BarChart3, color: "from-[#D4764E] to-[#B85C3A]" },
+  { label: "Create Event", icon: Calendar, color: "from-[#4A7DC9] to-[#3A6DB9]", href: "/events/upcoming" },
+  { label: "Add Student", icon: Users, color: "from-[#3D8B5E] to-[#2D6B4E]", href: "/community/students" },
+  { label: "Issue Certificate", icon: Award, color: "from-[#D4964E] to-[#B87A3A]", href: "/certificates/generate" },
+  { label: "View Analytics", icon: BarChart3, color: "from-[#D4764E] to-[#B85C3A]", href: "/analytics" },
 ]
 
 export default function DashboardPage() {
@@ -218,9 +219,9 @@ export default function DashboardPage() {
               <h2 className="text-[17px] font-semibold text-[var(--foreground)]">
                 Recent Activity
               </h2>
-              <button className="rounded-lg px-3 py-1.5 text-[13px] font-medium text-[var(--primary)] hover:bg-[var(--primary-light)] transition-colors">
+              <Link href="/analytics" className="rounded-lg px-3 py-1.5 text-[13px] font-medium text-[var(--primary)] hover:bg-[var(--primary-light)] transition-colors">
                 View all
-              </button>
+              </Link>
             </div>
             <div className="space-y-1">
               {recentActivity.map((activity) => (
@@ -257,9 +258,9 @@ export default function DashboardPage() {
               <h2 className="text-[17px] font-semibold text-[var(--foreground)]">
                 Upcoming Events
               </h2>
-              <button className="rounded-lg px-3 py-1.5 text-[13px] font-medium text-[var(--primary)] hover:bg-[var(--primary-light)] transition-colors">
+              <Link href="/events/upcoming" className="rounded-lg px-3 py-1.5 text-[13px] font-medium text-[var(--primary)] hover:bg-[var(--primary-light)] transition-colors">
                 View all
-              </button>
+              </Link>
             </div>
             <div className="space-y-4">
               {upcomingEvents.map((event) => (
@@ -314,9 +315,9 @@ export default function DashboardPage() {
               <h2 className="text-[17px] font-semibold text-[var(--foreground)]">
                 Top Students
               </h2>
-              <button className="rounded-lg px-3 py-1.5 text-[13px] font-medium text-[var(--primary)] hover:bg-[var(--primary-light)] transition-colors">
+              <Link href="/community/students" className="rounded-lg px-3 py-1.5 text-[13px] font-medium text-[var(--primary)] hover:bg-[var(--primary-light)] transition-colors">
                 View all
-              </button>
+              </Link>
             </div>
             <div className="space-y-1">
               {topStudents.map((student, index) => (
@@ -358,8 +359,9 @@ export default function DashboardPage() {
             </h2>
             <div className="grid grid-cols-2 gap-4">
               {quickActions.map((action) => (
-                <button
+                <Link
                   key={action.label}
+                  href={action.href}
                   className="group flex flex-col items-center gap-3 rounded-2xl border border-[var(--border-subtle)] p-6 transition-all duration-200 hover:border-[var(--border)] hover:shadow-[var(--shadow-md)] hover:-translate-y-0.5"
                 >
                   <div
@@ -370,7 +372,7 @@ export default function DashboardPage() {
                   <span className="text-[13px] font-medium text-[var(--foreground-subtle)] group-hover:text-[var(--foreground)]">
                     {action.label}
                   </span>
-                </button>
+                </Link>
               ))}
             </div>
           </div>

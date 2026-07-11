@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import Link from "next/link"
 import { AppLayout } from "@/components/layout/AppLayout"
 import {
   Users,
@@ -234,10 +235,10 @@ export default function StudentsPage() {
               <Download className="h-4 w-4" />
               Export
             </button>
-            <button className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#D4764E] to-[#E8956A] px-5 py-2.5 text-sm font-medium text-white shadow-md shadow-[#D4764E]/25 transition-all hover:shadow-lg hover:shadow-[#D4764E]/30">
+            <Link href="/community/students" className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#D4764E] to-[#E8956A] px-5 py-2.5 text-sm font-medium text-white shadow-md shadow-[#D4764E]/25 transition-all hover:shadow-lg hover:shadow-[#D4764E]/30">
               <Plus className="h-4 w-4" />
               Add Student
-            </button>
+            </Link>
           </div>
         </div>
 

@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import Link from "next/link"
 import { AppLayout } from "@/components/layout/AppLayout"
 import {
   Calendar,
@@ -151,10 +152,10 @@ export default function EventsPage() {
             <h1 className="text-2xl font-bold text-[var(--foreground)]">Events</h1>
             <p className="text-[var(--foreground-subtle)]">Manage workshops, bootcamps, seminars, and more.</p>
           </div>
-          <button className="flex items-center gap-2 rounded-xl bg-[var(--primary)] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[var(--primary-hover)] hover:shadow-lg hover:shadow-[var(--primary)]/20 transition-all">
+          <Link href="/events/upcoming" className="flex items-center gap-2 rounded-xl bg-[var(--primary)] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[var(--primary-hover)] hover:shadow-lg hover:shadow-[var(--primary)]/20 transition-all">
             <Plus className="h-4 w-4" />
             Create Event
-          </button>
+          </Link>
         </div>
 
         {/* Stats */}
@@ -277,10 +278,10 @@ export default function EventsPage() {
                 </div>
 
                 <div className="flex gap-2">
-                  <button className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-[var(--border)] bg-white px-3 py-2 text-sm font-medium text-[var(--foreground-subtle)] hover:bg-[var(--background-subtle)] hover:text-[var(--foreground)] transition-colors">
+                  <Link href={`/events/upcoming`} className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-[var(--border)] bg-white px-3 py-2 text-sm font-medium text-[var(--foreground-subtle)] hover:bg-[var(--background-subtle)] hover:text-[var(--foreground)] transition-colors">
                     <Eye className="h-4 w-4" />
                     View
-                  </button>
+                  </Link>
                   <button className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-[var(--border)] bg-white px-3 py-2 text-sm font-medium text-[var(--foreground-subtle)] hover:bg-[var(--background-subtle)] hover:text-[var(--foreground)] transition-colors">
                     <Edit className="h-4 w-4" />
                     Edit
