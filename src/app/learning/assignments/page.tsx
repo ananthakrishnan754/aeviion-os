@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import Link from "next/link"
 import { AppLayout } from "@/components/layout/AppLayout"
 import { FileText, Search, Plus, Clock, CheckCircle2, Users, Calendar } from "lucide-react"
 import { cn } from "@/lib/utils"
@@ -25,7 +26,7 @@ export default function AssignmentsPage() {
       <div className="space-y-8 animate-fadeIn">
         <div className="flex items-center justify-between">
           <div><h1 className="text-3xl font-bold text-[#2D2D2D]">Assignments</h1><p className="mt-1 text-[#6B6B6B]">Manage student assignments and submissions</p></div>
-          <button className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#D4764E] to-[#E8956A] px-5 py-2.5 text-sm font-medium text-white shadow-md shadow-[#D4764E]/25 transition-all hover:shadow-lg"><Plus className="h-4 w-4" />Create Assignment</button>
+          <Link href="/learning/assignments" className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#D4764E] to-[#E8956A] px-5 py-2.5 text-sm font-medium text-white shadow-md shadow-[#D4764E]/25 transition-all hover:shadow-lg"><Plus className="h-4 w-4" />Create Assignment</Link>
         </div>
         <div className="glass-card rounded-2xl border border-[#E8E0D4] bg-white p-4">
           <div className="relative max-w-md"><Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#999]" /><input type="text" placeholder="Search assignments..." value={search} onChange={(e) => setSearch(e.target.value)} className="w-full rounded-xl border border-[#E8E0D4] bg-[#FAF8F5] py-2.5 pl-10 pr-4 text-sm text-[#2D2D2D] placeholder:text-[#999] focus:border-[#D4764E] focus:outline-none focus:ring-1 focus:ring-[#D4764E]" /></div>

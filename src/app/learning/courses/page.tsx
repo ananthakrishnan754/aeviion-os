@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import Link from "next/link"
 import { AppLayout } from "@/components/layout/AppLayout"
 import {
   BookOpen,
@@ -90,10 +91,10 @@ export default function LearningPage() {
             <h1 className="text-2xl font-bold text-[var(--foreground)]">Learning Management</h1>
             <p className="text-[var(--foreground-subtle)]">Manage courses, modules, and learning content.</p>
           </div>
-          <button className="flex items-center gap-2 rounded-xl bg-[var(--primary)] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[var(--primary-hover)] hover:shadow-lg hover:shadow-[var(--primary)]/20 transition-all">
+          <Link href="/learning/courses" className="flex items-center gap-2 rounded-xl bg-[var(--primary)] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[var(--primary-hover)] hover:shadow-lg hover:shadow-[var(--primary)]/20 transition-all">
             <Plus className="h-4 w-4" />
             Create Course
-          </button>
+          </Link>
         </div>
 
         {/* Stats */}
