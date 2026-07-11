@@ -1,48 +1,70 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #0f172a;
-  --card: #ffffff;
-  --card-foreground: #0f172a;
-  --popover: #ffffff;
-  --popover-foreground: #0f172a;
-  --primary: #3b82f6;
-  --primary-foreground: #ffffff;
-  --secondary: #f1f5f9;
-  --secondary-foreground: #0f172a;
-  --muted: #f1f5f9;
-  --muted-foreground: #64748b;
-  --accent: #f1f5f9;
-  --accent-foreground: #0f172a;
-  --destructive: #ef4444;
-  --destructive-foreground: #ffffff;
-  --border: #e2e8f0;
-  --input: #e2e8f0;
-  --ring: #3b82f6;
-  --radius: 0.5rem;
-}
+  /* Claude-inspired warm palette */
+  --background: #FAF8F5;
+  --background-subtle: #F5F0EB;
+  --foreground: #1A1615;
+  --foreground-subtle: #6B5E57;
+  --card: #FFFFFF;
+  --card-hover: #FFFCF9;
+  --card-foreground: #1A1615;
+  --popover: #FFFFFF;
+  --popover-foreground: #1A1615;
 
-.dark {
-  --background: #0f172a;
-  --foreground: #f8fafc;
-  --card: #1e293b;
-  --card-foreground: #f8fafc;
-  --popover: #1e293b;
-  --popover-foreground: #f8fafc;
-  --primary: #3b82f6;
-  --primary-foreground: #ffffff;
-  --secondary: #1e293b;
-  --secondary-foreground: #f8fafc;
-  --muted: #1e293b;
-  --muted-foreground: #94a3b8;
-  --accent: #1e293b;
-  --accent-foreground: #f8fafc;
-  --destructive: #ef4444;
-  --destructive-foreground: #ffffff;
-  --border: #334155;
-  --input: #334155;
-  --ring: #3b82f6;
+  /* Primary: Terracotta / Warm accent */
+  --primary: #D4764E;
+  --primary-hover: #C06840;
+  --primary-light: #FDF0EA;
+  --primary-foreground: #FFFFFF;
+
+  /* Secondary: Warm neutral */
+  --secondary: #F0EBE5;
+  --secondary-foreground: #1A1615;
+
+  /* Muted */
+  --muted: #F0EBE5;
+  --muted-foreground: #8C7E76;
+
+  /* Accent */
+  --accent: #F0EBE5;
+  --accent-foreground: #1A1615;
+
+  /* Destructive */
+  --destructive: #DC3545;
+  --destructive-foreground: #FFFFFF;
+
+  /* Success */
+  --success: #3D8B5E;
+  --success-light: #EDF7F1;
+
+  /* Warning */
+  --warning: #D4964E;
+  --warning-light: #FDF5EA;
+
+  /* Info */
+  --info: #4A7DC9;
+  --info-light: #EBF2FC;
+
+  /* Borders & surfaces */
+  --border: #E8E2DB;
+  --border-subtle: #F0EBE5;
+  --input: #E8E2DB;
+  --ring: #D4764E;
+  --radius: 12px;
+
+  /* Shadows — Apple HIG layered depth */
+  --shadow-xs: 0 1px 2px rgba(26, 22, 21, 0.04);
+  --shadow-sm: 0 1px 3px rgba(26, 22, 21, 0.06), 0 1px 2px rgba(26, 22, 21, 0.04);
+  --shadow-md: 0 4px 6px -1px rgba(26, 22, 21, 0.06), 0 2px 4px -2px rgba(26, 22, 21, 0.04);
+  --shadow-lg: 0 10px 15px -3px rgba(26, 22, 21, 0.06), 0 4px 6px -4px rgba(26, 22, 21, 0.04);
+  --shadow-xl: 0 20px 25px -5px rgba(26, 22, 21, 0.08), 0 8px 10px -6px rgba(26, 22, 21, 0.04);
+  --shadow-glow: 0 0 20px rgba(212, 118, 78, 0.15);
+
+  /* Glass */
+  --glass-bg: rgba(255, 255, 255, 0.72);
+  --glass-border: rgba(255, 255, 255, 0.4);
+  --glass-blur: 16px;
 }
 
 * {
@@ -52,24 +74,139 @@
 body {
   background-color: var(--background);
   color: var(--foreground);
-  font-family: system-ui, -apple-system, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Inter", "Segoe UI", system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  letter-spacing: -0.011em;
 }
 
+/* Typography scale — Apple HIG inspired */
+h1 { font-size: 2rem; line-height: 1.2; font-weight: 700; letter-spacing: -0.025em; }
+h2 { font-size: 1.5rem; line-height: 1.3; font-weight: 600; letter-spacing: -0.02em; }
+h3 { font-size: 1.25rem; line-height: 1.4; font-weight: 600; letter-spacing: -0.015em; }
+
+/* Smooth transitions everywhere */
+* {
+  transition-property: background-color, border-color, color, box-shadow, opacity, transform;
+  transition-timing-function: cubic-bezier(0.25, 0.1, 0.25, 1);
+  transition-duration: 0ms;
+}
+
+a, button, input, select, textarea {
+  transition-duration: 200ms;
+}
+
+/* Focus styles — Apple HIG */
+:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+  border-radius: 8px;
+}
+
+/* Scrollbar — refined */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(140, 126, 118, 0.3);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(140, 126, 118, 0.5);
+}
+
+/* Utility classes */
 @layer utilities {
   .scrollbar-thin {
     scrollbar-width: thin;
   }
-  
+
   .scrollbar-thin::-webkit-scrollbar {
     width: 6px;
   }
-  
+
   .scrollbar-thin::-webkit-scrollbar-track {
     background: transparent;
   }
-  
+
   .scrollbar-thin::-webkit-scrollbar-thumb {
-    background-color: var(--muted-foreground);
+    background: rgba(140, 126, 118, 0.3);
     border-radius: 3px;
   }
+
+  .glass {
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid var(--glass-border);
+  }
+
+  .card-premium {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-sm);
+    transition: box-shadow 200ms, transform 200ms;
+  }
+
+  .card-premium:hover {
+    box-shadow: var(--shadow-lg);
+  }
+
+  .text-gradient {
+    background: linear-gradient(135deg, var(--primary), #B85C3A);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .animate-fade-in {
+    animation: fadeIn 400ms cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
+  }
+
+  .animate-slide-up {
+    animation: slideUp 400ms cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
+  }
+
+  .animate-scale-in {
+    animation: scaleIn 300ms cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
+  }
 }
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.96); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+/* Stagger children animation */
+.stagger-children > * {
+  opacity: 0;
+  animation: slideUp 400ms cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
+}
+.stagger-children > *:nth-child(1) { animation-delay: 0ms; }
+.stagger-children > *:nth-child(2) { animation-delay: 50ms; }
+.stagger-children > *:nth-child(3) { animation-delay: 100ms; }
+.stagger-children > *:nth-child(4) { animation-delay: 150ms; }
+.stagger-children > *:nth-child(5) { animation-delay: 200ms; }
+.stagger-children > *:nth-child(6) { animation-delay: 250ms; }
+.stagger-children > *:nth-child(7) { animation-delay: 300ms; }
+.stagger-children > *:nth-child(8) { animation-delay: 350ms; }
+.stagger-children > *:nth-child(9) { animation-delay: 400ms; }
+.stagger-children > *:nth-child(10) { animation-delay: 450ms; }

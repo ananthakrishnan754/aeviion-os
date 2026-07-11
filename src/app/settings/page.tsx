@@ -8,7 +8,6 @@ import {
   Shield,
   Bell,
   Palette,
-  Globe,
   Key,
   Save,
   Check,
@@ -36,12 +35,12 @@ export default function SettingsPage() {
 
   return (
     <AppLayout>
-      <div className="min-h-screen bg-gray-50 p-6">
+      <div className="min-h-screen p-6">
         <div className="mx-auto max-w-5xl">
           {/* Header */}
-          <div className="mb-8">
-            <h1 className="text-2xl font-bold text-gray-900">Settings</h1>
-            <p className="mt-1 text-sm text-gray-600">Configure your Aeviion OS platform</p>
+          <div className="mb-8 animate-slide-up">
+            <h1 className="text-2xl font-bold text-[var(--foreground)]">Settings</h1>
+            <p className="mt-1 text-sm text-[var(--foreground-subtle)]">Configure your Aeviion OS platform</p>
           </div>
 
           <div className="flex gap-6">
@@ -53,10 +52,10 @@ export default function SettingsPage() {
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
                     className={cn(
-                      "flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                      "flex w-full items-center gap-3 rounded-xl px-4 py-2.5 text-sm font-medium transition-all",
                       activeTab === tab.id
-                        ? "bg-blue-50 text-blue-600"
-                        : "text-gray-700 hover:bg-gray-100"
+                        ? "bg-[var(--primary-light)] text-[var(--primary)]"
+                        : "text-[var(--foreground-subtle)] hover:bg-[var(--background-subtle)] hover:text-[var(--foreground)]"
                     )}
                   >
                     {tab.icon}
@@ -67,73 +66,35 @@ export default function SettingsPage() {
             </div>
 
             {/* Content */}
-            <div className="flex-1 rounded-xl border bg-white p-6">
+            <div className="flex-1 card-premium p-6">
               {activeTab === "general" && (
                 <div className="space-y-6">
-                  <h2 className="text-lg font-semibold text-gray-900">General Settings</h2>
-
+                  <h2 className="text-lg font-semibold text-[var(--foreground)]">General Settings</h2>
                   <div className="space-y-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Organization Name
-                      </label>
-                      <input
-                        type="text"
-                        defaultValue="Aeviion"
-                        className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                      />
+                      <label className="block text-sm font-semibold text-[var(--foreground)] mb-2">Organization Name</label>
+                      <input type="text" defaultValue="Aeviion" className="w-full rounded-xl border border-[var(--border)] bg-[var(--background-subtle)] px-4 py-3 text-sm focus:border-[var(--primary)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 transition-all" />
                     </div>
-
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Organization Email
-                      </label>
-                      <input
-                        type="email"
-                        defaultValue="admin@aeviion.com"
-                        className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                      />
+                      <label className="block text-sm font-semibold text-[var(--foreground)] mb-2">Organization Email</label>
+                      <input type="email" defaultValue="admin@aeviion.com" className="w-full rounded-xl border border-[var(--border)] bg-[var(--background-subtle)] px-4 py-3 text-sm focus:border-[var(--primary)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 transition-all" />
                     </div>
-
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Website URL
-                      </label>
-                      <input
-                        type="url"
-                        defaultValue="https://aeviion.com"
-                        className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                      />
+                      <label className="block text-sm font-semibold text-[var(--foreground)] mb-2">Website URL</label>
+                      <input type="url" defaultValue="https://aeviion.com" className="w-full rounded-xl border border-[var(--border)] bg-[var(--background-subtle)] px-4 py-3 text-sm focus:border-[var(--primary)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 transition-all" />
                     </div>
-
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Timezone
-                      </label>
-                      <select className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500">
+                      <label className="block text-sm font-semibold text-[var(--foreground)] mb-2">Timezone</label>
+                      <select className="w-full rounded-xl border border-[var(--border)] bg-[var(--background-subtle)] px-4 py-3 text-sm focus:border-[var(--primary)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 transition-all">
                         <option>Asia/Kolkata (IST)</option>
                         <option>America/New_York (EST)</option>
                         <option>America/Los_Angeles (PST)</option>
                         <option>Europe/London (GMT)</option>
                       </select>
                     </div>
-
-                    <div className="flex items-center gap-3">
-                      <button
-                        onClick={handleSave}
-                        className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
-                      >
-                        {saved ? (
-                          <>
-                            <Check className="h-4 w-4" />
-                            Saved!
-                          </>
-                        ) : (
-                          <>
-                            <Save className="h-4 w-4" />
-                            Save Changes
-                          </>
-                        )}
+                    <div className="flex items-center gap-3 pt-2">
+                      <button onClick={handleSave} className="flex items-center gap-2 rounded-xl bg-[var(--primary)] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[var(--primary-hover)] hover:shadow-lg hover:shadow-[var(--primary)]/20 transition-all">
+                        {saved ? <><Check className="h-4 w-4" /> Saved!</> : <><Save className="h-4 w-4" /> Save Changes</>}
                       </button>
                     </div>
                   </div>
@@ -142,9 +103,8 @@ export default function SettingsPage() {
 
               {activeTab === "roles" && (
                 <div className="space-y-6">
-                  <h2 className="text-lg font-semibold text-gray-900">Roles & Permissions</h2>
-
-                  <div className="space-y-4">
+                  <h2 className="text-lg font-semibold text-[var(--foreground)]">Roles & Permissions</h2>
+                  <div className="space-y-3">
                     {[
                       { name: "CEO", permissions: ["Full access", "All modules", "User management"] },
                       { name: "CTO", permissions: ["Technical modules", "API access", "System settings"] },
@@ -152,27 +112,17 @@ export default function SettingsPage() {
                       { name: "Mentor", permissions: ["View students", "Grade assignments", "View reports"] },
                       { name: "Student", permissions: ["View courses", "Submit projects", "View certificates"] },
                     ].map((role) => (
-                      <div
-                        key={role.name}
-                        className="rounded-lg border border-gray-200 p-4"
-                      >
+                      <div key={role.name} className="rounded-xl border border-[var(--border)] p-4 hover:bg-[var(--background-subtle)] transition-colors">
                         <div className="flex items-center justify-between">
                           <div>
-                            <h3 className="font-medium text-gray-900">{role.name}</h3>
-                            <div className="mt-1 flex flex-wrap gap-2">
+                            <h3 className="font-semibold text-[var(--foreground)]">{role.name}</h3>
+                            <div className="mt-2 flex flex-wrap gap-1.5">
                               {role.permissions.map((perm) => (
-                                <span
-                                  key={perm}
-                                  className="rounded-full bg-gray-100 px-2 py-1 text-xs text-gray-600"
-                                >
-                                  {perm}
-                                </span>
+                                <span key={perm} className="rounded-full bg-[var(--primary-light)] px-2.5 py-1 text-xs font-medium text-[var(--primary)]">{perm}</span>
                               ))}
                             </div>
                           </div>
-                          <button className="text-sm text-blue-600 hover:text-blue-700">
-                            Edit
-                          </button>
+                          <button className="text-sm font-semibold text-[var(--primary)] hover:text-[var(--primary-hover)]">Edit</button>
                         </div>
                       </div>
                     ))}
@@ -182,9 +132,8 @@ export default function SettingsPage() {
 
               {activeTab === "notifications" && (
                 <div className="space-y-6">
-                  <h2 className="text-lg font-semibold text-gray-900">Notification Settings</h2>
-
-                  <div className="space-y-4">
+                  <h2 className="text-lg font-semibold text-[var(--foreground)]">Notification Settings</h2>
+                  <div className="space-y-3">
                     {[
                       { label: "Email notifications", description: "Receive email for important updates", enabled: true },
                       { label: "New student registrations", description: "Get notified when new students join", enabled: true },
@@ -192,26 +141,19 @@ export default function SettingsPage() {
                       { label: "Event reminders", description: "Receive reminders before events", enabled: false },
                       { label: "Weekly digest", description: "Get a weekly summary of activity", enabled: true },
                     ].map((item) => (
-                      <div
-                        key={item.label}
-                        className="flex items-center justify-between rounded-lg border border-gray-200 p-4"
-                      >
+                      <div key={item.label} className="flex items-center justify-between rounded-xl border border-[var(--border)] p-4 hover:bg-[var(--background-subtle)] transition-colors">
                         <div>
-                          <h3 className="font-medium text-gray-900">{item.label}</h3>
-                          <p className="text-sm text-gray-500">{item.description}</p>
+                          <h3 className="font-medium text-[var(--foreground)]">{item.label}</h3>
+                          <p className="text-sm text-[var(--muted-foreground)]">{item.description}</p>
                         </div>
-                        <button
-                          className={cn(
-                            "relative inline-flex h-6 w-11 items-center rounded-full transition-colors",
-                            item.enabled ? "bg-blue-600" : "bg-gray-200"
-                          )}
-                        >
-                          <span
-                            className={cn(
-                              "inline-block h-4 w-4 transform rounded-full bg-white transition-transform",
-                              item.enabled ? "translate-x-6" : "translate-x-1"
-                            )}
-                          />
+                        <button className={cn(
+                          "relative inline-flex h-6 w-11 items-center rounded-full transition-colors",
+                          item.enabled ? "bg-[var(--primary)]" : "bg-[var(--border)]"
+                        )}>
+                          <span className={cn(
+                            "inline-block h-4 w-4 transform rounded-full bg-white transition-transform shadow-sm",
+                            item.enabled ? "translate-x-6" : "translate-x-1"
+                          )} />
                         </button>
                       </div>
                     ))}
@@ -221,51 +163,30 @@ export default function SettingsPage() {
 
               {activeTab === "branding" && (
                 <div className="space-y-6">
-                  <h2 className="text-lg font-semibold text-gray-900">Branding Settings</h2>
-
+                  <h2 className="text-lg font-semibold text-[var(--foreground)]">Branding Settings</h2>
                   <div className="space-y-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Primary Color
-                      </label>
+                      <label className="block text-sm font-semibold text-[var(--foreground)] mb-2">Primary Color</label>
                       <div className="flex items-center gap-3">
-                        <input
-                          type="color"
-                          defaultValue="#2563eb"
-                          className="h-10 w-10 rounded-lg border border-gray-300 cursor-pointer"
-                        />
-                        <input
-                          type="text"
-                          defaultValue="#2563eb"
-                          className="w-32 rounded-lg border border-gray-300 px-4 py-2.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                        />
+                        <input type="color" defaultValue="#D4764E" className="h-10 w-10 rounded-xl border border-[var(--border)] cursor-pointer" />
+                        <input type="text" defaultValue="#D4764E" className="w-32 rounded-xl border border-[var(--border)] bg-[var(--background-subtle)] px-4 py-3 text-sm focus:border-[var(--primary)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 transition-all" />
                       </div>
                     </div>
-
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Logo
-                      </label>
+                      <label className="block text-sm font-semibold text-[var(--foreground)] mb-2">Logo</label>
                       <div className="flex items-center gap-4">
-                        <div className="flex h-20 w-20 items-center justify-center rounded-lg border-2 border-dashed border-gray-300">
-                          <span className="text-sm text-gray-500">Upload</span>
+                        <div className="flex h-20 w-20 items-center justify-center rounded-xl border-2 border-dashed border-[var(--border)] hover:border-[var(--primary)]/40 transition-colors cursor-pointer">
+                          <span className="text-sm text-[var(--muted-foreground)]">Upload</span>
                         </div>
                         <div>
-                          <p className="text-sm text-gray-600">Recommended size: 200x200px</p>
-                          <p className="text-sm text-gray-500">PNG, JPG, or SVG</p>
+                          <p className="text-sm text-[var(--foreground-subtle)]">Recommended size: 200x200px</p>
+                          <p className="text-sm text-[var(--muted-foreground)]">PNG, JPG, or SVG</p>
                         </div>
                       </div>
                     </div>
-
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Custom CSS
-                      </label>
-                      <textarea
-                        rows={6}
-                        placeholder="/* Add custom CSS here */"
-                        className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm font-mono focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                      />
+                      <label className="block text-sm font-semibold text-[var(--foreground)] mb-2">Custom CSS</label>
+                      <textarea rows={6} placeholder="/* Add custom CSS here */" className="w-full rounded-xl border border-[var(--border)] bg-[var(--background-subtle)] px-4 py-3 text-sm font-mono focus:border-[var(--primary)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 transition-all resize-none" />
                     </div>
                   </div>
                 </div>
@@ -273,44 +194,26 @@ export default function SettingsPage() {
 
               {activeTab === "api" && (
                 <div className="space-y-6">
-                  <h2 className="text-lg font-semibold text-gray-900">API Keys</h2>
-
-                  <div className="space-y-4">
-                    <div className="rounded-lg border border-gray-200 p-4">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <h3 className="font-medium text-gray-900">Production Key</h3>
-                          <p className="text-sm text-gray-500">Created: Jan 1, 2025</p>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <code className="rounded bg-gray-100 px-3 py-1 text-sm font-mono">
-                            aev_prod_••••••••••••
-                          </code>
-                          <button className="text-sm text-blue-600 hover:text-blue-700">
-                            Copy
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="rounded-lg border border-gray-200 p-4">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <h3 className="font-medium text-gray-900">Development Key</h3>
-                          <p className="text-sm text-gray-500">Created: Jan 10, 2025</p>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <code className="rounded bg-gray-100 px-3 py-1 text-sm font-mono">
-                            aev_dev_••••••••••••
-                          </code>
-                          <button className="text-sm text-blue-600 hover:text-blue-700">
-                            Copy
-                          </button>
+                  <h2 className="text-lg font-semibold text-[var(--foreground)]">API Keys</h2>
+                  <div className="space-y-3">
+                    {[
+                      { name: "Production Key", created: "Jan 1, 2025", key: "aev_prod_••••••••••••" },
+                      { name: "Development Key", created: "Jan 10, 2025", key: "aev_dev_••••••••••••" },
+                    ].map((apiKey) => (
+                      <div key={apiKey.name} className="rounded-xl border border-[var(--border)] p-4 hover:bg-[var(--background-subtle)] transition-colors">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <h3 className="font-medium text-[var(--foreground)]">{apiKey.name}</h3>
+                            <p className="text-sm text-[var(--muted-foreground)]">Created: {apiKey.created}</p>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <code className="rounded-lg bg-[var(--background-subtle)] px-3 py-1.5 text-sm font-mono text-[var(--foreground-subtle)]">{apiKey.key}</code>
+                            <button className="text-sm font-semibold text-[var(--primary)] hover:text-[var(--primary-hover)]">Copy</button>
+                          </div>
                         </div>
                       </div>
-                    </div>
-
-                    <button className="flex items-center gap-2 rounded-lg border border-dashed border-gray-300 px-4 py-3 text-sm font-medium text-gray-600 hover:border-blue-300 hover:bg-blue-50 hover:text-blue-600 w-full justify-center">
+                    ))}
+                    <button className="flex items-center gap-2 rounded-xl border-2 border-dashed border-[var(--border)] px-4 py-3 text-sm font-semibold text-[var(--foreground-subtle)] hover:border-[var(--primary)]/40 hover:bg-[var(--primary-light)] hover:text-[var(--primary)] transition-all w-full justify-center">
                       <Key className="h-4 w-4" />
                       Generate New Key
                     </button>

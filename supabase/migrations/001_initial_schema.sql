@@ -10,7 +10,7 @@ create extension if not exists "uuid-ossp";
 -- USERS & AUTH
 -- ============================================================
 create table users (
-  id uuid primary key default uuid_generate_v4(),
+  id uuid primary key default gen_random_uuid(),
   email varchar(255) not null unique,
   name varchar(255) not null,
   avatar text,
@@ -23,7 +23,7 @@ create table users (
 );
 
 create table student_profiles (
-  id uuid primary key default uuid_generate_v4(),
+  id uuid primary key default gen_random_uuid(),
   user_id uuid references users(id) on delete cascade not null,
   college varchar(255),
   degree varchar(255),
@@ -42,7 +42,7 @@ create table student_profiles (
 -- FORMS
 -- ============================================================
 create table forms (
-  id uuid primary key default uuid_generate_v4(),
+  id uuid primary key default gen_random_uuid(),
   title varchar(255) not null,
   description text,
   slug varchar(255) not null unique,
@@ -59,7 +59,7 @@ create table forms (
 );
 
 create table form_responses (
-  id uuid primary key default uuid_generate_v4(),
+  id uuid primary key default gen_random_uuid(),
   form_id uuid references forms(id) on delete cascade not null,
   respondent_email varchar(255),
   respondent_name varchar(255),
@@ -73,7 +73,7 @@ create table form_responses (
 -- EVENTS
 -- ============================================================
 create table events (
-  id uuid primary key default uuid_generate_v4(),
+  id uuid primary key default gen_random_uuid(),
   title varchar(255) not null,
   description text,
   date timestamptz not null,
@@ -94,7 +94,7 @@ create table events (
 );
 
 create table event_registrations (
-  id uuid primary key default uuid_generate_v4(),
+  id uuid primary key default gen_random_uuid(),
   event_id uuid references events(id) on delete cascade not null,
   user_id uuid references users(id) not null,
   status varchar(20) default 'registered',
@@ -108,7 +108,7 @@ create table event_registrations (
 -- COURSES & LEARNING
 -- ============================================================
 create table courses (
-  id uuid primary key default uuid_generate_v4(),
+  id uuid primary key default gen_random_uuid(),
   title varchar(255) not null,
   description text,
   short_description varchar(500),
@@ -126,7 +126,7 @@ create table courses (
 );
 
 create table course_modules (
-  id uuid primary key default uuid_generate_v4(),
+  id uuid primary key default gen_random_uuid(),
   course_id uuid references courses(id) on delete cascade not null,
   title varchar(255) not null,
   description text,
@@ -135,7 +135,7 @@ create table course_modules (
 );
 
 create table lessons (
-  id uuid primary key default uuid_generate_v4(),
+  id uuid primary key default gen_random_uuid(),
   module_id uuid references course_modules(id) on delete cascade not null,
   title varchar(255) not null,
   type varchar(20) default 'video',
@@ -151,7 +151,7 @@ create table lessons (
 -- CERTIFICATES
 -- ============================================================
 create table certificates (
-  id uuid primary key default uuid_generate_v4(),
+  id uuid primary key default gen_random_uuid(),
   title varchar(255) not null,
   recipient_id uuid references users(id),
   recipient_name varchar(255) not null,
@@ -170,7 +170,7 @@ create table certificates (
 );
 
 create table certificate_templates (
-  id uuid primary key default uuid_generate_v4(),
+  id uuid primary key default gen_random_uuid(),
   name varchar(255) not null,
   description text,
   background_url text,
@@ -185,7 +185,7 @@ create table certificate_templates (
 -- PROJECTS
 -- ============================================================
 create table projects (
-  id uuid primary key default uuid_generate_v4(),
+  id uuid primary key default gen_random_uuid(),
   title varchar(255) not null,
   description text,
   team_members jsonb default '[]'::jsonb,
@@ -209,7 +209,7 @@ create table projects (
 -- COMMUNITY
 -- ============================================================
 create table communities (
-  id uuid primary key default uuid_generate_v4(),
+  id uuid primary key default gen_random_uuid(),
   name varchar(255) not null,
   description text,
   icon text,
@@ -221,7 +221,7 @@ create table communities (
 );
 
 create table community_members (
-  id uuid primary key default uuid_generate_v4(),
+  id uuid primary key default gen_random_uuid(),
   community_id uuid references communities(id) on delete cascade not null,
   user_id uuid references users(id) not null,
   role varchar(20) default 'member',
@@ -232,7 +232,7 @@ create table community_members (
 -- NOTIFICATIONS
 -- ============================================================
 create table notifications (
-  id uuid primary key default uuid_generate_v4(),
+  id uuid primary key default gen_random_uuid(),
   user_id uuid references users(id) not null,
   title varchar(255) not null,
   message text,
@@ -246,7 +246,7 @@ create table notifications (
 -- ACTIVITY LOGS
 -- ============================================================
 create table activity_logs (
-  id uuid primary key default uuid_generate_v4(),
+  id uuid primary key default gen_random_uuid(),
   user_id uuid references users(id),
   action varchar(100) not null,
   entity varchar(100) not null,

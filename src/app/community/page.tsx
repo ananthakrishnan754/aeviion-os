@@ -7,18 +7,15 @@ import {
   Users,
   UserPlus,
   Search,
-  Filter,
-  MoreVertical,
-  Mail,
-  Phone,
   GraduationCap,
   Award,
   FolderOpen,
   ExternalLink,
-  ArrowUpRight,
-  TrendingUp,
   Star,
   Briefcase,
+  Mail,
+  TrendingUp,
+  ArrowUpRight,
 } from "lucide-react"
 import { AppLayout } from "@/components/layout/AppLayout"
 import type { MockStudent } from "@/lib/db/mock-data"
@@ -66,19 +63,27 @@ export default function CommunityPage() {
     avgScore: Math.round(students.reduce((sum, s) => sum + s.communityScore, 0) / students.length),
   }
 
+  const statCards = [
+    { label: "Total Members", value: stats.total, icon: Users, color: "from-[var(--primary)] to-[#C06840]" },
+    { label: "Active", value: stats.active, icon: TrendingUp, color: "from-[var(--success)] to-[#2D7A4A]" },
+    { label: "Courses Done", value: stats.totalCourses, icon: GraduationCap, color: "from-[var(--info)] to-[#3A6BB0]" },
+    { label: "Projects", value: stats.totalProjects, icon: FolderOpen, color: "from-[var(--warning)] to-[#B88030]" },
+    { label: "Avg. Score", value: stats.avgScore, icon: Star, color: "from-[#9B6DD7] to-[#7B4FB7]" },
+  ]
+
   return (
     <AppLayout>
-      <div className="min-h-screen bg-gray-50 p-6">
+      <div className="min-h-screen p-6">
         <div className="mx-auto max-w-7xl">
           {/* Header */}
-          <div className="mb-8 flex items-center justify-between">
+          <div className="mb-8 flex items-center justify-between animate-slide-up">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">Community</h1>
-              <p className="mt-1 text-sm text-gray-600">Manage your student community and track engagement</p>
+              <h1 className="text-2xl font-bold text-[var(--foreground)]">Community</h1>
+              <p className="mt-1 text-sm text-[var(--foreground-subtle)]">Manage your student community and track engagement</p>
             </div>
             <Link
               href="/community/students"
-              className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-blue-700 transition-colors"
+              className="flex items-center gap-2 rounded-xl bg-[var(--primary)] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[var(--primary-hover)] hover:shadow-lg hover:shadow-[var(--primary)]/20 transition-all"
             >
               <UserPlus className="h-4 w-4" />
               View All Students
@@ -86,92 +91,48 @@ export default function CommunityPage() {
           </div>
 
           {/* Stats */}
-          <div className="mb-6 grid grid-cols-5 gap-4">
-            <div className="rounded-xl border bg-white p-4">
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100">
-                  <Users className="h-5 w-5 text-blue-600" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold text-gray-900">{stats.total}</p>
-                  <p className="text-xs text-gray-500">Total Members</p>
-                </div>
-              </div>
-            </div>
-            <div className="rounded-xl border bg-white p-4">
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-green-100">
-                  <ArrowUpRight className="h-5 w-5 text-green-600" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold text-gray-900">{stats.active}</p>
-                  <p className="text-xs text-gray-500">Active</p>
+          <div className="mb-6 grid grid-cols-5 gap-4 stagger-children">
+            {statCards.map((stat) => (
+              <div key={stat.label} className="card-premium p-4 group">
+                <div className="flex items-center gap-3">
+                  <div className={cn("flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br text-white shadow-sm", stat.color)}>
+                    <stat.icon className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <p className="text-2xl font-bold text-[var(--foreground)]">{stat.value}</p>
+                    <p className="text-xs text-[var(--muted-foreground)] font-medium">{stat.label}</p>
+                  </div>
                 </div>
               </div>
-            </div>
-            <div className="rounded-xl border bg-white p-4">
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-100">
-                  <GraduationCap className="h-5 w-5 text-purple-600" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold text-gray-900">{stats.totalCourses}</p>
-                  <p className="text-xs text-gray-500">Courses Completed</p>
-                </div>
-              </div>
-            </div>
-            <div className="rounded-xl border bg-white p-4">
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-amber-100">
-                  <FolderOpen className="h-5 w-5 text-amber-600" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold text-gray-900">{stats.totalProjects}</p>
-                  <p className="text-xs text-gray-500">Projects</p>
-                </div>
-              </div>
-            </div>
-            <div className="rounded-xl border bg-white p-4">
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-red-100">
-                  <Star className="h-5 w-5 text-red-600" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold text-gray-900">{stats.avgScore}</p>
-                  <p className="text-xs text-gray-500">Avg. Score</p>
-                </div>
-              </div>
-            </div>
+            ))}
           </div>
 
           {/* Filters */}
-          <div className="mb-6 flex items-center gap-4">
+          <div className="mb-6 flex items-center gap-3">
             <div className="relative flex-1 max-w-md">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+              <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--muted-foreground)]" />
               <input
                 type="text"
                 placeholder="Search by name or email..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full rounded-lg border border-gray-300 py-2.5 pl-10 pr-4 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                className="w-full rounded-xl border border-[var(--border)] bg-white py-2.5 pl-10 pr-4 text-sm focus:border-[var(--primary)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 transition-all"
               />
             </div>
             <select
               value={collegeFilter}
               onChange={(e) => setCollegeFilter(e.target.value)}
-              className="rounded-lg border border-gray-300 px-4 py-2.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="rounded-xl border border-[var(--border)] bg-white px-4 py-2.5 text-sm focus:border-[var(--primary)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 transition-all"
             >
               <option value="all">All Colleges</option>
               {colleges.map((college) => (
-                <option key={college} value={college}>
-                  {college}
-                </option>
+                <option key={college} value={college}>{college}</option>
               ))}
             </select>
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
-              className="rounded-lg border border-gray-300 px-4 py-2.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="rounded-xl border border-[var(--border)] bg-white px-4 py-2.5 text-sm focus:border-[var(--primary)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 transition-all"
             >
               <option value="score">Top Score</option>
               <option value="name">Name</option>
@@ -182,41 +143,41 @@ export default function CommunityPage() {
           {/* Members Grid */}
           {loading ? (
             <div className="flex items-center justify-center py-20">
-              <div className="h-8 w-8 animate-spin rounded-full border-4 border-blue-600 border-t-transparent" />
+              <div className="h-8 w-8 animate-spin rounded-full border-4 border-[var(--primary)] border-t-transparent" />
             </div>
           ) : filteredStudents.length === 0 ? (
-            <div className="rounded-xl border-2 border-dashed border-gray-300 py-16 text-center">
-              <Users className="mx-auto h-12 w-12 text-gray-400" />
-              <h3 className="mt-4 text-lg font-medium text-gray-900">No members found</h3>
-              <p className="mt-2 text-gray-600">Try adjusting your filters</p>
+            <div className="rounded-2xl border-2 border-dashed border-[var(--border)] py-16 text-center">
+              <Users className="mx-auto h-12 w-12 text-[var(--muted-foreground)]" />
+              <h3 className="mt-4 text-lg font-medium text-[var(--foreground)]">No members found</h3>
+              <p className="mt-2 text-[var(--foreground-subtle)]">Try adjusting your filters</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+            <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3 stagger-children">
               {filteredStudents.map((student) => (
                 <div
                   key={student.id}
-                  className="group rounded-xl border bg-white p-6 transition-all hover:shadow-md hover:border-gray-300"
+                  className="card-premium p-6 group cursor-default"
                 >
                   {/* Header */}
                   <div className="mb-4 flex items-start gap-4">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-purple-500 text-lg font-bold text-white">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-[var(--primary)] to-[#B85C3A] text-lg font-bold text-white shadow-sm">
                       {student.name.charAt(0)}
                     </div>
-                    <div className="flex-1">
-                      <h3 className="font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-semibold text-[var(--foreground)] group-hover:text-[var(--primary)] transition-colors truncate">
                         {student.name}
                       </h3>
-                      <p className="text-sm text-gray-500">{student.email}</p>
-                      <p className="text-sm text-gray-500">{student.college}</p>
+                      <p className="text-sm text-[var(--foreground-subtle)] truncate">{student.email}</p>
+                      <p className="text-sm text-[var(--muted-foreground)] truncate">{student.college}</p>
                     </div>
                     <span
                       className={cn(
-                        "rounded-full px-2 py-1 text-xs font-medium",
+                        "rounded-full px-2.5 py-1 text-xs font-semibold",
                         student.status === "active"
-                          ? "bg-green-100 text-green-700"
+                          ? "bg-[var(--success-light)] text-[var(--success)]"
                           : student.status === "alumni"
-                          ? "bg-purple-100 text-purple-700"
-                          : "bg-gray-100 text-gray-600"
+                          ? "bg-[#F3EEFA] text-[#7B4FB7]"
+                          : "bg-[var(--muted)] text-[var(--muted-foreground)]"
                       )}
                     >
                       {student.status}
@@ -225,13 +186,13 @@ export default function CommunityPage() {
 
                   {/* Score */}
                   <div className="mb-4">
-                    <div className="flex items-center justify-between text-sm mb-1">
-                      <span className="text-gray-500">Community Score</span>
-                      <span className="font-semibold text-gray-900">{student.communityScore}</span>
+                    <div className="flex items-center justify-between text-sm mb-1.5">
+                      <span className="text-[var(--muted-foreground)] font-medium">Community Score</span>
+                      <span className="font-bold text-[var(--foreground)]">{student.communityScore}</span>
                     </div>
-                    <div className="h-2 rounded-full bg-gray-200 overflow-hidden">
+                    <div className="h-2 rounded-full bg-[var(--background-subtle)] overflow-hidden">
                       <div
-                        className="h-full rounded-full bg-gradient-to-r from-blue-500 to-purple-500"
+                        className="h-full rounded-full bg-gradient-to-r from-[var(--primary)] to-[#B85C3A]"
                         style={{ width: `${student.communityScore}%` }}
                       />
                     </div>
@@ -239,34 +200,34 @@ export default function CommunityPage() {
 
                   {/* Stats */}
                   <div className="mb-4 grid grid-cols-3 gap-2 text-center">
-                    <div className="rounded-lg bg-gray-50 p-2">
-                      <p className="text-lg font-bold text-gray-900">{student.coursesCompleted}</p>
-                      <p className="text-xs text-gray-500">Courses</p>
+                    <div className="rounded-xl bg-[var(--background-subtle)] p-2.5">
+                      <p className="text-lg font-bold text-[var(--foreground)]">{student.coursesCompleted}</p>
+                      <p className="text-xs text-[var(--muted-foreground)] font-medium">Courses</p>
                     </div>
-                    <div className="rounded-lg bg-gray-50 p-2">
-                      <p className="text-lg font-bold text-gray-900">{student.projectsCount}</p>
-                      <p className="text-xs text-gray-500">Projects</p>
+                    <div className="rounded-xl bg-[var(--background-subtle)] p-2.5">
+                      <p className="text-lg font-bold text-[var(--foreground)]">{student.projectsCount}</p>
+                      <p className="text-xs text-[var(--muted-foreground)] font-medium">Projects</p>
                     </div>
-                    <div className="rounded-lg bg-gray-50 p-2">
-                      <p className="text-lg font-bold text-gray-900">{student.certificatesCount}</p>
-                      <p className="text-xs text-gray-500">Certs</p>
+                    <div className="rounded-xl bg-[var(--background-subtle)] p-2.5">
+                      <p className="text-lg font-bold text-[var(--foreground)]">{student.certificatesCount}</p>
+                      <p className="text-xs text-[var(--muted-foreground)] font-medium">Certs</p>
                     </div>
                   </div>
 
                   {/* Skills */}
                   <div className="mb-4">
-                    <p className="mb-2 text-xs font-medium text-gray-500">Skills</p>
-                    <div className="flex flex-wrap gap-1">
+                    <p className="mb-2 text-xs font-semibold text-[var(--muted-foreground)] uppercase tracking-wider">Skills</p>
+                    <div className="flex flex-wrap gap-1.5">
                       {student.skills.slice(0, 4).map((skill, i) => (
                         <span
                           key={i}
-                          className="rounded-full bg-blue-50 px-2 py-1 text-xs text-blue-700"
+                          className="rounded-full bg-[var(--primary-light)] px-2.5 py-1 text-xs font-medium text-[var(--primary)]"
                         >
                           {skill}
                         </span>
                       ))}
                       {student.skills.length > 4 && (
-                        <span className="rounded-full bg-gray-100 px-2 py-1 text-xs text-gray-600">
+                        <span className="rounded-full bg-[var(--muted)] px-2.5 py-1 text-xs font-medium text-[var(--muted-foreground)]">
                           +{student.skills.length - 4}
                         </span>
                       )}
@@ -274,13 +235,13 @@ export default function CommunityPage() {
                   </div>
 
                   {/* Actions */}
-                  <div className="flex items-center gap-2 pt-4 border-t">
+                  <div className="flex items-center gap-2 pt-4 border-t border-[var(--border)]">
                     {student.github && (
                       <a
                         href={student.github}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex-1 flex items-center justify-center gap-2 rounded-lg border border-gray-200 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+                        className="flex-1 flex items-center justify-center gap-2 rounded-xl border border-[var(--border)] px-3 py-2 text-sm font-medium text-[var(--foreground-subtle)] hover:bg-[var(--background-subtle)] hover:text-[var(--foreground)] transition-colors"
                       >
                         <ExternalLink className="h-4 w-4" />
                         GitHub
@@ -291,13 +252,13 @@ export default function CommunityPage() {
                         href={student.linkedin}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex-1 flex items-center justify-center gap-2 rounded-lg border border-gray-200 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+                        className="flex-1 flex items-center justify-center gap-2 rounded-xl border border-[var(--border)] px-3 py-2 text-sm font-medium text-[var(--foreground-subtle)] hover:bg-[var(--background-subtle)] hover:text-[var(--foreground)] transition-colors"
                       >
                         <Briefcase className="h-4 w-4" />
                         LinkedIn
                       </a>
                     )}
-                    <button className="rounded-lg border border-gray-200 p-2 text-gray-500 hover:bg-gray-50 hover:text-gray-700">
+                    <button className="rounded-xl border border-[var(--border)] p-2 text-[var(--muted-foreground)] hover:bg-[var(--background-subtle)] hover:text-[var(--foreground)] transition-colors">
                       <Mail className="h-4 w-4" />
                     </button>
                   </div>

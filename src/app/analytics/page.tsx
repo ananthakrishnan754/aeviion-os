@@ -9,47 +9,17 @@ import {
   Calendar,
   DollarSign,
   Award,
-  BookOpen,
   Download,
-  Filter,
   ArrowUpRight,
   ArrowDownRight,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 const stats = [
-  {
-    title: "Total Students",
-    value: "12,456",
-    change: "+12%",
-    trend: "up",
-    icon: Users,
-    color: "bg-blue-500",
-  },
-  {
-    title: "Revenue",
-    value: "$45,230",
-    change: "+18%",
-    trend: "up",
-    icon: DollarSign,
-    color: "bg-green-500",
-  },
-  {
-    title: "Events Hosted",
-    value: "24",
-    change: "+8%",
-    trend: "up",
-    icon: Calendar,
-    color: "bg-purple-500",
-  },
-  {
-    title: "Certificates Issued",
-    value: "2,456",
-    change: "+15%",
-    trend: "up",
-    icon: Award,
-    color: "bg-yellow-500",
-  },
+  { title: "Total Students", value: "12,456", change: "+12%", trend: "up" as const, icon: Users, color: "from-[var(--primary)] to-[#C06840]" },
+  { title: "Revenue", value: "$45,230", change: "+18%", trend: "up" as const, icon: DollarSign, color: "from-[var(--success)] to-[#2D7A4A]" },
+  { title: "Events Hosted", value: "24", change: "+8%", trend: "up" as const, icon: Calendar, color: "from-[#9B6DD7] to-[#7B4FB7]" },
+  { title: "Certificates Issued", value: "2,456", change: "+15%", trend: "up" as const, icon: Award, color: "from-[var(--warning)] to-[#B88030]" },
 ]
 
 const monthlyData = [
@@ -101,25 +71,19 @@ export default function AnalyticsPage() {
     <AppLayout>
       <div className="space-y-6">
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between animate-slide-up">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Analytics</h1>
-            <p className="text-gray-600">
-              Track growth, engagement, and performance metrics.
-            </p>
+            <h1 className="text-2xl font-bold text-[var(--foreground)]">Analytics</h1>
+            <p className="text-[var(--foreground-subtle)]">Track growth, engagement, and performance metrics.</p>
           </div>
           <div className="flex gap-2">
-            <select
-              value={timeRange}
-              onChange={(e) => setTimeRange(e.target.value)}
-              className="rounded-lg border bg-white px-4 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-            >
+            <select value={timeRange} onChange={(e) => setTimeRange(e.target.value)} className="rounded-xl border border-[var(--border)] bg-white px-4 py-2.5 text-sm focus:border-[var(--primary)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 transition-all">
               <option value="7days">Last 7 days</option>
               <option value="30days">Last 30 days</option>
               <option value="3months">Last 3 months</option>
               <option value="12months">Last 12 months</option>
             </select>
-            <button className="flex items-center gap-2 rounded-lg border bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
+            <button className="flex items-center gap-2 rounded-xl border border-[var(--border)] bg-white px-4 py-2.5 text-sm font-medium text-[var(--foreground-subtle)] hover:bg-[var(--background-subtle)] transition-colors">
               <Download className="h-4 w-4" />
               Export
             </button>
@@ -127,81 +91,52 @@ export default function AnalyticsPage() {
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 stagger-children">
           {stats.map((stat) => (
-            <div
-              key={stat.title}
-              className="rounded-xl border bg-white p-6 shadow-sm"
-            >
+            <div key={stat.title} className="card-premium p-5 group">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">
-                    {stat.title}
-                  </p>
-                  <p className="text-2xl font-bold text-gray-900">{stat.value}</p>
+                  <p className="text-sm font-medium text-[var(--muted-foreground)]">{stat.title}</p>
+                  <p className="text-2xl font-bold text-[var(--foreground)]">{stat.value}</p>
                 </div>
-                <div className={cn("rounded-lg p-3", stat.color)}>
-                  <stat.icon className="h-6 w-6 text-white" />
+                <div className={cn("rounded-xl bg-gradient-to-br p-3 text-white shadow-sm", stat.color)}>
+                  <stat.icon className="h-5 w-5" />
                 </div>
               </div>
-              <div className="mt-4 flex items-center gap-2">
+              <div className="mt-3 flex items-center gap-1.5">
                 {stat.trend === "up" ? (
-                  <ArrowUpRight className="h-4 w-4 text-green-500" />
+                  <ArrowUpRight className="h-3.5 w-3.5 text-[var(--success)]" />
                 ) : (
-                  <ArrowDownRight className="h-4 w-4 text-red-500" />
+                  <ArrowDownRight className="h-3.5 w-3.5 text-[var(--destructive)]" />
                 )}
-                <span
-                  className={cn(
-                    "text-sm font-medium",
-                    stat.trend === "up" ? "text-green-500" : "text-red-500"
-                  )}
-                >
+                <span className={cn("text-sm font-semibold", stat.trend === "up" ? "text-[var(--success)]" : "text-[var(--destructive)]")}>
                   {stat.change}
                 </span>
-                <span className="text-sm text-gray-500">vs last month</span>
+                <span className="text-xs text-[var(--muted-foreground)]">vs last month</span>
               </div>
             </div>
           ))}
         </div>
 
         {/* Main chart */}
-        <div className="rounded-xl border bg-white p-6 shadow-sm">
+        <div className="card-premium p-6">
           <div className="mb-6 flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-gray-900">Growth Overview</h2>
-            <div className="flex gap-2">
-              <button
-                onClick={() => setChartType("students")}
-                className={cn(
-                  "rounded-lg px-3 py-1.5 text-sm font-medium",
-                  chartType === "students"
-                    ? "bg-blue-100 text-blue-700"
-                    : "text-gray-600 hover:bg-gray-100"
-                )}
-              >
-                Students
-              </button>
-              <button
-                onClick={() => setChartType("revenue")}
-                className={cn(
-                  "rounded-lg px-3 py-1.5 text-sm font-medium",
-                  chartType === "revenue"
-                    ? "bg-blue-100 text-blue-700"
-                    : "text-gray-600 hover:bg-gray-100"
-                )}
-              >
-                Revenue
-              </button>
-              <button
-                onClick={() => setChartType("events")}
-                className={cn(
-                  "rounded-lg px-3 py-1.5 text-sm font-medium",
-                  chartType === "events"
-                    ? "bg-blue-100 text-blue-700"
-                    : "text-gray-600 hover:bg-gray-100"
-                )}
-              >
-                Events
-              </button>
+            <h2 className="text-lg font-semibold text-[var(--foreground)]">Growth Overview</h2>
+            <div className="flex gap-1.5 bg-[var(--background-subtle)] rounded-xl p-1">
+              {(["students", "revenue", "events"] as const).map((type) => (
+                <button
+                  key={type}
+                  onClick={() => setChartType(type)}
+                  className={cn(
+                    "rounded-lg px-3.5 py-1.5 text-sm font-medium transition-all capitalize",
+                    chartType === type
+                      ? "bg-white text-[var(--primary)] shadow-sm"
+                      : "text-[var(--muted-foreground)] hover:text-[var(--foreground)]"
+                  )}
+                >
+                  {type}
+                </button>
+              ))}
             </div>
           </div>
 
@@ -214,13 +149,11 @@ export default function AnalyticsPage() {
                 <div key={data.month} className="flex-1">
                   <div className="flex h-56 flex-col items-center justify-end">
                     <div
-                      className="w-full rounded-t-lg bg-blue-500 transition-all hover:bg-blue-600"
+                      className="w-full rounded-t-lg bg-gradient-to-t from-[var(--primary)] to-[#D4964E] transition-all hover:from-[var(--primary-hover)] hover:to-[var(--primary)]"
                       style={{ height: `${height}%` }}
                     />
                   </div>
-                  <p className="mt-2 text-center text-xs text-gray-500">
-                    {data.month}
-                  </p>
+                  <p className="mt-2 text-center text-xs text-[var(--muted-foreground)] font-medium">{data.month}</p>
                 </div>
               )
             })}
@@ -228,29 +161,21 @@ export default function AnalyticsPage() {
         </div>
 
         {/* Bottom section */}
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-5 lg:grid-cols-3 stagger-children">
           {/* Top courses */}
-          <div className="rounded-xl border bg-white p-6 shadow-sm">
-            <h2 className="mb-4 text-lg font-semibold text-gray-900">
-              Top Courses
-            </h2>
-            <div className="space-y-4">
+          <div className="card-premium p-5">
+            <h2 className="mb-4 text-lg font-semibold text-[var(--foreground)]">Top Courses</h2>
+            <div className="space-y-3.5">
               {topCourses.map((course, index) => (
                 <div key={course.name} className="flex items-center gap-3">
-                  <span className="text-lg font-bold text-gray-400">
-                    {index + 1}
-                  </span>
-                  <div className="flex-1">
-                    <p className="font-medium text-gray-900">{course.name}</p>
-                    <p className="text-sm text-gray-500">
-                      {course.students.toLocaleString()} students
-                    </p>
+                  <span className="text-lg font-bold text-[var(--border)] w-6">{index + 1}</span>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-[var(--foreground)] truncate">{course.name}</p>
+                    <p className="text-sm text-[var(--muted-foreground)]">{course.students.toLocaleString()} students</p>
                   </div>
                   <div className="flex items-center gap-1">
-                    <span className="text-sm font-medium text-yellow-600">
-                      {course.rating}
-                    </span>
-                    <span className="text-xs text-gray-500">★</span>
+                    <span className="text-sm font-bold text-[var(--warning)]">{course.rating}</span>
+                    <span className="text-xs text-[var(--muted-foreground)]">★</span>
                   </div>
                 </div>
               ))}
@@ -258,28 +183,20 @@ export default function AnalyticsPage() {
           </div>
 
           {/* Top colleges */}
-          <div className="rounded-xl border bg-white p-6 shadow-sm">
-            <h2 className="mb-4 text-lg font-semibold text-gray-900">
-              Top Colleges
-            </h2>
-            <div className="space-y-4">
+          <div className="card-premium p-5">
+            <h2 className="mb-4 text-lg font-semibold text-[var(--foreground)]">Top Colleges</h2>
+            <div className="space-y-3.5">
               {topColleges.map((college, index) => (
                 <div key={college.name} className="flex items-center gap-3">
-                  <span className="text-lg font-bold text-gray-400">
-                    {index + 1}
-                  </span>
-                  <div className="flex-1">
-                    <p className="font-medium text-gray-900">{college.name}</p>
-                    <p className="text-sm text-gray-500">
-                      {college.students} students
-                    </p>
+                  <span className="text-lg font-bold text-[var(--border)] w-6">{index + 1}</span>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-[var(--foreground)] truncate">{college.name}</p>
+                    <p className="text-sm text-[var(--muted-foreground)]">{college.students} students</p>
                   </div>
-                  <div className="h-2 w-24 rounded-full bg-gray-200">
+                  <div className="h-2 w-24 rounded-full bg-[var(--background-subtle)]">
                     <div
-                      className="h-2 rounded-full bg-blue-500"
-                      style={{
-                        width: `${(college.students / topColleges[0].students) * 100}%`,
-                      }}
+                      className="h-2 rounded-full bg-gradient-to-r from-[var(--primary)] to-[#B85C3A]"
+                      style={{ width: `${(college.students / topColleges[0].students) * 100}%` }}
                     />
                   </div>
                 </div>
@@ -288,20 +205,18 @@ export default function AnalyticsPage() {
           </div>
 
           {/* Recent activity */}
-          <div className="rounded-xl border bg-white p-6 shadow-sm">
-            <h2 className="mb-4 text-lg font-semibold text-gray-900">
-              Recent Activity
-            </h2>
-            <div className="space-y-4">
+          <div className="card-premium p-5">
+            <h2 className="mb-4 text-lg font-semibold text-[var(--foreground)]">Recent Activity</h2>
+            <div className="space-y-3.5">
               {recentActivity.map((activity, index) => (
                 <div key={index} className="flex items-start gap-3">
-                  <div className="mt-1 h-2 w-2 rounded-full bg-blue-500" />
+                  <div className="mt-1.5 h-2 w-2 rounded-full bg-[var(--primary)] shrink-0" />
                   <div>
-                    <p className="text-sm text-gray-900">
+                    <p className="text-sm text-[var(--foreground)]">
                       {activity.action}{" "}
-                      <span className="font-medium">{activity.target}</span>
+                      <span className="font-semibold">{activity.target}</span>
                     </p>
-                    <p className="text-xs text-gray-500">{activity.time}</p>
+                    <p className="text-xs text-[var(--muted-foreground)] mt-0.5">{activity.time}</p>
                   </div>
                 </div>
               ))}

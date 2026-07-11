@@ -160,36 +160,35 @@ const stats = [
     value: "12,456",
     change: "+12%",
     icon: Users,
-    color: "bg-blue-500",
+    gradient: "from-[#D4764E] to-[#E8956A]",
   },
   {
     title: "Active Students",
     value: "8,234",
     change: "+8%",
     icon: TrendingUp,
-    color: "bg-green-500",
+    gradient: "from-[#6B8E6B] to-[#8CB88C]",
   },
   {
     title: "Avg. Score",
     value: "87%",
     change: "+3%",
     icon: Star,
-    color: "bg-purple-500",
+    gradient: "from-[#B8860B] to-[#DAA520]",
   },
   {
     title: "Top Colleges",
     value: "156",
     change: "+5%",
     icon: Award,
-    color: "bg-yellow-500",
+    gradient: "from-[#8B6F47] to-[#A0845C]",
   },
 ]
 
 export default function StudentsPage() {
-  const [students, setStudents] = useState<Student[]>(mockStudents)
+  const [students] = useState<Student[]>(mockStudents)
   const [searchQuery, setSearchQuery] = useState("")
   const [statusFilter, setStatusFilter] = useState<string>("all")
-  const [selectedStudent, setSelectedStudent] = useState<Student | null>(null)
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
 
   const filteredStudents = students.filter((student) => {
@@ -205,37 +204,37 @@ export default function StudentsPage() {
   const getStatusColor = (status: string) => {
     switch (status) {
       case "active":
-        return "bg-green-100 text-green-700"
+        return "bg-[#6B8E6B]/15 text-[#5A7A5A]"
       case "inactive":
-        return "bg-gray-100 text-gray-700"
+        return "bg-[#8B6F47]/15 text-[#8B6F47]"
       case "alumni":
-        return "bg-purple-100 text-purple-700"
+        return "bg-[#D4764E]/15 text-[#C06540]"
       default:
-        return "bg-gray-100 text-gray-700"
+        return "bg-[#8B6F47]/15 text-[#8B6F47]"
     }
   }
 
   return (
     <AppLayout>
-      <div className="space-y-6">
+      <div className="space-y-8 animate-fadeIn">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Student Database</h1>
-            <p className="text-gray-600">
+            <h1 className="text-3xl font-bold text-[#2D2D2D]">Student Database</h1>
+            <p className="mt-1 text-[#6B6B6B]">
               Manage and track all student information in one place.
             </p>
           </div>
-          <div className="flex gap-2">
-            <button className="flex items-center gap-2 rounded-lg border bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
+          <div className="flex gap-3">
+            <button className="flex items-center gap-2 rounded-xl border border-[#E8E0D4] bg-white px-4 py-2.5 text-sm font-medium text-[#6B6B6B] transition-all hover:border-[#D4764E]/30 hover:text-[#D4764E]">
               <Upload className="h-4 w-4" />
               Import
             </button>
-            <button className="flex items-center gap-2 rounded-lg border bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
+            <button className="flex items-center gap-2 rounded-xl border border-[#E8E0D4] bg-white px-4 py-2.5 text-sm font-medium text-[#6B6B6B] transition-all hover:border-[#D4764E]/30 hover:text-[#D4764E]">
               <Download className="h-4 w-4" />
               Export
             </button>
-            <button className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">
+            <button className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#D4764E] to-[#E8956A] px-5 py-2.5 text-sm font-medium text-white shadow-md shadow-[#D4764E]/25 transition-all hover:shadow-lg hover:shadow-[#D4764E]/30">
               <Plus className="h-4 w-4" />
               Add Student
             </button>
@@ -243,64 +242,65 @@ export default function StudentsPage() {
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {stats.map((stat) => (
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          {stats.map((stat, i) => (
             <div
               key={stat.title}
-              className="rounded-xl border bg-white p-6 shadow-sm"
+              className="glass-card group rounded-2xl border border-[#E8E0D4] bg-white p-6 transition-all duration-300 hover:border-[#D4764E]/30 hover:shadow-lg hover:shadow-[#D4764E]/5"
+              style={{ animationDelay: `${i * 50}ms` }}
             >
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">
+                  <p className="text-sm font-medium text-[#6B6B6B]">
                     {stat.title}
                   </p>
-                  <p className="text-2xl font-bold text-gray-900">{stat.value}</p>
+                  <p className="mt-1 text-3xl font-bold text-[#2D2D2D]">{stat.value}</p>
                 </div>
-                <div className={cn("rounded-lg p-3", stat.color)}>
-                  <stat.icon className="h-6 w-6 text-white" />
+                <div className={cn("rounded-xl bg-gradient-to-br p-3 text-white shadow-md", stat.gradient)}>
+                  <stat.icon className="h-5 w-5" />
                 </div>
               </div>
-              <div className="mt-4 flex items-center gap-2">
-                <ArrowUpRight className="h-4 w-4 text-green-500" />
-                <span className="text-sm font-medium text-green-500">
+              <div className="mt-4 flex items-center gap-1.5">
+                <ArrowUpRight className="h-3.5 w-3.5 text-[#6B8E6B]" />
+                <span className="text-sm font-semibold text-[#6B8E6B]">
                   {stat.change}
                 </span>
-                <span className="text-sm text-gray-500">vs last month</span>
+                <span className="text-xs text-[#999]">vs last month</span>
               </div>
             </div>
           ))}
         </div>
 
         {/* Filters */}
-        <div className="flex flex-wrap items-center gap-4">
+        <div className="glass-card flex flex-wrap items-center gap-4 rounded-2xl border border-[#E8E0D4] bg-white p-4">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#999]" />
             <input
               type="text"
               placeholder="Search students by name, email, or college..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full rounded-lg border bg-white py-2 pl-10 pr-4 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="w-full rounded-xl border border-[#E8E0D4] bg-[#FAF8F5] py-2.5 pl-10 pr-4 text-sm text-[#2D2D2D] placeholder:text-[#999] focus:border-[#D4764E] focus:outline-none focus:ring-1 focus:ring-[#D4764E]"
             />
           </div>
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="rounded-lg border bg-white px-4 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            className="rounded-xl border border-[#E8E0D4] bg-[#FAF8F5] px-4 py-2.5 text-sm text-[#2D2D2D] focus:border-[#D4764E] focus:outline-none focus:ring-1 focus:ring-[#D4764E]"
           >
             <option value="all">All Status</option>
             <option value="active">Active</option>
             <option value="inactive">Inactive</option>
             <option value="alumni">Alumni</option>
           </select>
-          <div className="flex rounded-lg border bg-white">
+          <div className="flex overflow-hidden rounded-xl border border-[#E8E0D4]">
             <button
               onClick={() => setViewMode("grid")}
               className={cn(
-                "rounded-l-lg px-3 py-2 text-sm font-medium",
+                "px-4 py-2.5 text-sm font-medium transition-all",
                 viewMode === "grid"
-                  ? "bg-blue-50 text-blue-600"
-                  : "text-gray-700 hover:bg-gray-50"
+                  ? "bg-gradient-to-r from-[#D4764E] to-[#E8956A] text-white"
+                  : "bg-[#FAF8F5] text-[#6B6B6B] hover:bg-[#F0EBE3]"
               )}
             >
               Grid
@@ -308,10 +308,10 @@ export default function StudentsPage() {
             <button
               onClick={() => setViewMode("list")}
               className={cn(
-                "rounded-r-lg px-3 py-2 text-sm font-medium",
+                "px-4 py-2.5 text-sm font-medium transition-all",
                 viewMode === "list"
-                  ? "bg-blue-50 text-blue-600"
-                  : "text-gray-700 hover:bg-gray-50"
+                  ? "bg-gradient-to-r from-[#D4764E] to-[#E8956A] text-white"
+                  : "bg-[#FAF8F5] text-[#6B6B6B] hover:bg-[#F0EBE3]"
               )}
             >
               List
@@ -322,25 +322,26 @@ export default function StudentsPage() {
         {/* Students grid */}
         {viewMode === "grid" ? (
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {filteredStudents.map((student) => (
+            {filteredStudents.map((student, i) => (
               <div
                 key={student.id}
-                className="group rounded-xl border bg-white shadow-sm transition-all hover:shadow-md"
+                className="glass-card group rounded-2xl border border-[#E8E0D4] bg-white transition-all duration-300 hover:border-[#D4764E]/30 hover:shadow-lg hover:shadow-[#D4764E]/5"
+                style={{ animationDelay: `${i * 60}ms` }}
               >
                 <div className="p-6">
-                  <div className="mb-4 flex items-start justify-between">
+                  <div className="mb-5 flex items-start justify-between">
                     <div className="flex items-center gap-4">
-                      <div className="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-purple-500 text-lg font-bold text-white">
+                      <div className="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-[#D4764E] to-[#E8956A] text-lg font-bold text-white shadow-md shadow-[#D4764E]/25">
                         {student.name
                           .split(" ")
                           .map((n) => n[0])
                           .join("")}
                       </div>
                       <div>
-                        <h3 className="font-semibold text-gray-900">
+                        <h3 className="font-semibold text-[#2D2D2D]">
                           {student.name}
                         </h3>
-                        <p className="text-sm text-gray-600">{student.college}</p>
+                        <p className="text-sm text-[#6B6B6B]">{student.college}</p>
                       </div>
                     </div>
                     <span
@@ -353,58 +354,58 @@ export default function StudentsPage() {
                     </span>
                   </div>
 
-                  <div className="mb-4 flex flex-wrap gap-2">
+                  <div className="mb-5 flex flex-wrap gap-2">
                     {student.skills.slice(0, 3).map((skill) => (
                       <span
                         key={skill}
-                        className="rounded-full bg-blue-50 px-2.5 py-0.5 text-xs font-medium text-blue-700"
+                        className="rounded-full bg-[#D4764E]/10 px-2.5 py-0.5 text-xs font-medium text-[#C06540]"
                       >
                         {skill}
                       </span>
                     ))}
                     {student.skills.length > 3 && (
-                      <span className="rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-600">
+                      <span className="rounded-full bg-[#F0EBE3] px-2.5 py-0.5 text-xs font-medium text-[#8B6F47]">
                         +{student.skills.length - 3}
                       </span>
                     )}
                   </div>
 
-                  <div className="mb-4 grid grid-cols-3 gap-4 text-center">
-                    <div>
-                      <p className="text-2xl font-bold text-gray-900">
+                  <div className="mb-5 grid grid-cols-3 gap-4 text-center">
+                    <div className="rounded-xl bg-[#FAF8F5] p-3">
+                      <p className="text-xl font-bold text-[#2D2D2D]">
                         {student.coursesCompleted}
                       </p>
-                      <p className="text-xs text-gray-500">Courses</p>
+                      <p className="mt-0.5 text-xs text-[#999]">Courses</p>
                     </div>
-                    <div>
-                      <p className="text-2xl font-bold text-gray-900">
+                    <div className="rounded-xl bg-[#FAF8F5] p-3">
+                      <p className="text-xl font-bold text-[#2D2D2D]">
                         {student.projectsCount}
                       </p>
-                      <p className="text-xs text-gray-500">Projects</p>
+                      <p className="mt-0.5 text-xs text-[#999]">Projects</p>
                     </div>
-                    <div>
-                      <p className="text-2xl font-bold text-gray-900">
+                    <div className="rounded-xl bg-[#FAF8F5] p-3">
+                      <p className="text-xl font-bold text-[#2D2D2D]">
                         {student.certificatesCount}
                       </p>
-                      <p className="text-xs text-gray-500">Certificates</p>
+                      <p className="mt-0.5 text-xs text-[#999]">Certs</p>
                     </div>
                   </div>
 
-                  <div className="flex items-center justify-between border-t pt-4">
-                    <div className="flex items-center gap-1">
-                      <Star className="h-4 w-4 text-yellow-400" />
-                      <span className="text-sm font-medium text-gray-900">
+                  <div className="flex items-center justify-between border-t border-[#E8E0D4] pt-4">
+                    <div className="flex items-center gap-1.5">
+                      <Star className="h-4 w-4 fill-[#B8860B] text-[#B8860B]" />
+                      <span className="text-sm font-semibold text-[#2D2D2D]">
                         {student.communityScore}
                       </span>
-                      <span className="text-xs text-gray-500">score</span>
+                      <span className="text-xs text-[#999]">score</span>
                     </div>
-                    <div className="flex gap-2">
+                    <div className="flex gap-1">
                       {student.github && (
                         <a
                           href={student.github}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="rounded-lg p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
+                          className="rounded-lg p-2 text-[#999] transition-colors hover:bg-[#F0EBE3] hover:text-[#2D2D2D]"
                         >
                           <Github className="h-4 w-4" />
                         </a>
@@ -414,7 +415,7 @@ export default function StudentsPage() {
                           href={student.linkedin}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="rounded-lg p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
+                          className="rounded-lg p-2 text-[#999] transition-colors hover:bg-[#F0EBE3] hover:text-[#2D2D2D]"
                         >
                           <Linkedin className="h-4 w-4" />
                         </a>
@@ -423,13 +424,13 @@ export default function StudentsPage() {
                   </div>
                 </div>
 
-                <div className="border-t bg-gray-50 px-6 py-3">
+                <div className="border-t border-[#E8E0D4] bg-[#FAF8F5]/50 px-6 py-3.5">
                   <div className="flex gap-2">
-                    <button className="flex flex-1 items-center justify-center gap-2 rounded-lg border bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
+                    <button className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-[#F0EBE3] px-3 py-2 text-sm font-medium text-[#2D2D2D] transition-all hover:bg-[#D4764E]/10 hover:text-[#D4764E]">
                       <Eye className="h-4 w-4" />
                       View Profile
                     </button>
-                    <button className="flex items-center justify-center rounded-lg border bg-white px-3 py-2 text-gray-700 hover:bg-gray-50">
+                    <button className="flex items-center justify-center rounded-xl border border-[#E8E0D4] bg-white px-3 py-2 text-[#999] transition-all hover:border-[#D4764E]/30 hover:text-[#D4764E]">
                       <MoreVertical className="h-4 w-4" />
                     </button>
                   </div>
@@ -438,51 +439,51 @@ export default function StudentsPage() {
             ))}
           </div>
         ) : (
-          <div className="rounded-xl border bg-white shadow-sm">
+          <div className="glass-card overflow-hidden rounded-2xl border border-[#E8E0D4] bg-white">
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
-                  <tr className="border-b bg-gray-50">
-                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                  <tr className="border-b border-[#E8E0D4] bg-[#FAF8F5]">
+                    <th className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-[#6B6B6B]">
                       Student
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                    <th className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-[#6B6B6B]">
                       College
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                    <th className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-[#6B6B6B]">
                       Skills
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                    <th className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-[#6B6B6B]">
                       Score
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                    <th className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-[#6B6B6B]">
                       Status
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                    <th className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-[#6B6B6B]">
                       Actions
                     </th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-200">
+                <tbody className="divide-y divide-[#E8E0D4]">
                   {filteredStudents.map((student) => (
-                    <tr key={student.id} className="hover:bg-gray-50">
+                    <tr key={student.id} className="transition-colors hover:bg-[#FAF8F5]/50">
                       <td className="whitespace-nowrap px-6 py-4">
                         <div className="flex items-center gap-3">
-                          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-purple-500 text-sm font-bold text-white">
+                          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-[#D4764E] to-[#E8956A] text-sm font-bold text-white">
                             {student.name
                               .split(" ")
                               .map((n) => n[0])
                               .join("")}
                           </div>
                           <div>
-                            <p className="font-medium text-gray-900">
+                            <p className="font-medium text-[#2D2D2D]">
                               {student.name}
                             </p>
-                            <p className="text-sm text-gray-500">{student.email}</p>
+                            <p className="text-sm text-[#999]">{student.email}</p>
                           </div>
                         </div>
                       </td>
-                      <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-600">
+                      <td className="whitespace-nowrap px-6 py-4 text-sm text-[#6B6B6B]">
                         {student.college}
                       </td>
                       <td className="px-6 py-4">
@@ -490,13 +491,13 @@ export default function StudentsPage() {
                           {student.skills.slice(0, 2).map((skill) => (
                             <span
                               key={skill}
-                              className="rounded-full bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-700"
+                              className="rounded-full bg-[#D4764E]/10 px-2 py-0.5 text-xs font-medium text-[#C06540]"
                             >
                               {skill}
                             </span>
                           ))}
                           {student.skills.length > 2 && (
-                            <span className="rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-600">
+                            <span className="rounded-full bg-[#F0EBE3] px-2 py-0.5 text-xs font-medium text-[#8B6F47]">
                               +{student.skills.length - 2}
                             </span>
                           )}
@@ -504,8 +505,8 @@ export default function StudentsPage() {
                       </td>
                       <td className="whitespace-nowrap px-6 py-4">
                         <div className="flex items-center gap-1">
-                          <Star className="h-4 w-4 text-yellow-400" />
-                          <span className="text-sm font-medium text-gray-900">
+                          <Star className="h-4 w-4 fill-[#B8860B] text-[#B8860B]" />
+                          <span className="text-sm font-semibold text-[#2D2D2D]">
                             {student.communityScore}
                           </span>
                         </div>
@@ -521,14 +522,14 @@ export default function StudentsPage() {
                         </span>
                       </td>
                       <td className="whitespace-nowrap px-6 py-4">
-                        <div className="flex gap-2">
-                          <button className="rounded-lg p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-600">
+                        <div className="flex gap-1">
+                          <button className="rounded-lg p-2 text-[#999] transition-colors hover:bg-[#F0EBE3] hover:text-[#2D2D2D]">
                             <Eye className="h-4 w-4" />
                           </button>
-                          <button className="rounded-lg p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-600">
+                          <button className="rounded-lg p-2 text-[#999] transition-colors hover:bg-[#F0EBE3] hover:text-[#2D2D2D]">
                             <Edit className="h-4 w-4" />
                           </button>
-                          <button className="rounded-lg p-2 text-gray-400 hover:bg-red-50 hover:text-red-600">
+                          <button className="rounded-lg p-2 text-[#999] transition-colors hover:bg-red-50 hover:text-red-500">
                             <Trash2 className="h-4 w-4" />
                           </button>
                         </div>
@@ -542,12 +543,14 @@ export default function StudentsPage() {
         )}
 
         {filteredStudents.length === 0 && (
-          <div className="rounded-xl border bg-white p-12 text-center">
-            <Users className="mx-auto h-12 w-12 text-gray-400" />
-            <h3 className="mt-4 text-lg font-medium text-gray-900">
+          <div className="glass-card rounded-2xl border border-[#E8E0D4] bg-white p-16 text-center">
+            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-[#F0EBE3]">
+              <Users className="h-8 w-8 text-[#999]" />
+            </div>
+            <h3 className="mt-5 text-lg font-semibold text-[#2D2D2D]">
               No students found
             </h3>
-            <p className="mt-2 text-gray-600">
+            <p className="mt-2 text-[#6B6B6B]">
               Try adjusting your search or filter criteria.
             </p>
           </div>
