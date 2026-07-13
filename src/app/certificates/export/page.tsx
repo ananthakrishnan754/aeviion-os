@@ -1,30 +1,127 @@
 "use client"
 
+import { useState, useEffect } from "react"
 import { AppLayout } from "@/components/layout/AppLayout"
-import { Download, FileText, Award, Users, Calendar } from "lucide-react"
+import { Download, Search, Award, FileJson, FileText, Check } from "lucide-react"
 import { cn } from "@/lib/utils"
 
-const exports = [
-  { id: "1", label: "All Certificates", count: 1240, icon: Award, gradient: "from-[#D4764E] to-[#E8956A]" },
-  { id: "2", label: "This Month", count: 89, icon: Calendar, gradient: "from-[#6B8E6B] to-[#8CB88C]" },
-  { id: "3", label: "By Course", count: 12, icon: FileText, gradient: "from-[#4A7DC9] to-[#3A6DB9]" },
-  { id: "4", label: "By Student", count: 456, icon: Users, gradient: "from-[#B8860B] to-[#DAA520]" },
-]
+interface Certificate {
+  id: string
+  title: string
+  recipient_name: string
+  recipient_email: string
+  type: string
+  verification_code: string
+  status: string
+  issued_at: string
+}
 
-export default function CertExportPage() {
+export default function CertificatesExportPage() {
+  const [certificates, setCertificates] = useState<Certificate[]>([])
+  const [loading, setLoading] = useState(true)
+  const [exporting, setExporting] = useState<string | null>(null)
+
+  useEffect(() => {
+    fetch("/api/certificates")
+      .then((r) => r.json())
+      .then((data) => setCertificates(data || []))
+      .finally(() => setLoading(false))
+  }, [])
+
+  const exportCSV = () => {
+    setExporting("csv")
+    const headers = ["Title", "Recipient", "Email", "Type", "Code", "Status", "Issued"]
+    const rows = certificates.map((c) => [
+      c.title, c.recipient_name, c.recipient_email, c.type, c.verification_code, c.status, new Date(c.issued_at).toISOString(),
+    ])
+    const csv = [headers.join(","), ...rows.map((r) => r.map((v) => `"${v || ""}"`).join(","))].join("\n")
+    const blob = new Blob([csv], { type: "text/csv" })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement("a")
+    a.href = url
+    a.download = `certificates-${new Date().toISOString().slice(0, 10)}.csv`
+    a.click()
+    URL.revokeObjectURL(url)
+    setTimeout(() => setExporting(null), 1000)
+  }
+
+  const exportJSON = () => {
+    setExporting("json")
+    const json = JSON.stringify(certificates, null, 2)
+    const blob = new Blob([json], { type: "application/json" })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement("a")
+    a.href = url
+    a.download = `certificates-${new Date().toISOString().slice(0, 10)}.json`
+    a.click()
+    URL.revokeObjectURL(url)
+    setTimeout(() => setExporting(null), 1000)
+  }
+
   return (
     <AppLayout>
-      <div className="space-y-8 animate-fadeIn">
-        <div><h1 className="text-3xl font-bold text-[#2D2D2D]">Bulk Export</h1><p className="mt-1 text-[#6B6B6B]">Export certificates in bulk</p></div>
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
-          {exports.map((e, i) => (
-            <div key={e.id} className="glass-card rounded-2xl border border-[#E8E0D4] bg-white p-6 transition-all duration-300 hover:border-[#D4764E]/30 hover:shadow-lg hover:shadow-[#D4764E]/5" style={{ animationDelay: `${i * 60}ms` }}>
-              <div className={cn("mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br text-white shadow-md", e.gradient)}><e.icon className="h-6 w-6" /></div>
-              <h3 className="text-lg font-semibold text-[#2D2D2D]">{e.label}</h3>
-              <p className="mt-1 text-sm text-[#999]">{e.count} certificates</p>
-              <button className="mt-4 w-full flex items-center justify-center gap-2 rounded-xl bg-[#FAF8F5] py-2.5 text-sm font-medium text-[#2D2D2D] transition-all hover:bg-[#D4764E]/10 hover:text-[#D4764E]"><Download className="h-4 w-4" />Export PDF</button>
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-3xl font-bold text-[var(--foreground)]">Export Certificates</h1>
+          <p className="text-[var(--muted-foreground)]">Bulk export certificate data</p>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <button
+            onClick={exportCSV}
+            disabled={loading || certificates.length === 0}
+            className="card-premium p-6 text-left hover:shadow-lg transition-all group disabled:opacity-50"
+          >
+            <div className="flex items-center gap-4">
+              <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-br from-green-500 to-green-600 text-white">
+                {exporting === "csv" ? <Check className="h-6 w-6" /> : <FileText className="h-6 w-6" />}
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-[var(--foreground)]">Export as CSV</h3>
+                <p className="text-sm text-[var(--muted-foreground)]">Spreadsheet-compatible format</p>
+              </div>
             </div>
-          ))}
+          </button>
+
+          <button
+            onClick={exportJSON}
+            disabled={loading || certificates.length === 0}
+            className="card-premium p-6 text-left hover:shadow-lg transition-all group disabled:opacity-50"
+          >
+            <div className="flex items-center gap-4">
+              <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 text-white">
+                {exporting === "json" ? <Check className="h-6 w-6" /> : <FileJson className="h-6 w-6" />}
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-[var(--foreground)]">Export as JSON</h3>
+                <p className="text-sm text-[var(--muted-foreground)]">Structured data format</p>
+              </div>
+            </div>
+          </button>
+        </div>
+
+        <div className="card-premium p-5">
+          <h3 className="font-semibold text-[var(--foreground)] mb-3">Preview ({certificates.length} certificates)</h3>
+          {loading ? (
+            <div className="animate-pulse h-20 bg-[var(--muted)] rounded-xl" />
+          ) : certificates.length === 0 ? (
+            <p className="text-sm text-[var(--muted-foreground)]">No certificates to export</p>
+          ) : (
+            <div className="max-h-60 overflow-y-auto space-y-2">
+              {certificates.slice(0, 10).map((c) => (
+                <div key={c.id} className="flex items-center gap-3 text-sm p-2 rounded-lg hover:bg-[var(--muted)]/50">
+                  <Award className="h-4 w-4 text-[var(--primary)] shrink-0" />
+                  <span className="font-medium text-[var(--foreground)] truncate">{c.title}</span>
+                  <span className="text-[var(--muted-foreground)]">—</span>
+                  <span className="text-[var(--muted-foreground)] truncate">{c.recipient_name}</span>
+                  <span className="ml-auto text-xs text-[var(--muted-foreground)] font-mono">{c.verification_code}</span>
+                </div>
+              ))}
+              {certificates.length > 10 && (
+                <p className="text-xs text-[var(--muted-foreground)] text-center pt-2">...and {certificates.length - 10} more</p>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </AppLayout>
