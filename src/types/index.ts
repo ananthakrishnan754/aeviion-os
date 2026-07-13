@@ -1,18 +1,136 @@
+// ============================================================
+// FORM BUILDER TYPES — Tally-style block system
+// ============================================================
+
+export type FormBlockType =
+  | "heading"
+  | "paragraph"
+  | "text"
+  | "email"
+  | "phone"
+  | "number"
+  | "textarea"
+  | "select"
+  | "multi-select"
+  | "checkbox"
+  | "radio"
+  | "date"
+  | "time"
+  | "file"
+  | "url"
+  | "divider"
+  | "page-break"
+  | "rating"
+  | "statement"
+
+export interface FormBlockOption {
+  id: string
+  label: string
+  value: string
+}
+
+export interface ConditionalRule {
+  blockId: string
+  action: "show" | "hide"
+  condition: "equals" | "not_equals" | "contains" | "not_empty" | "is_empty"
+  value?: string
+}
+
+export interface FormBlockValidation {
+  minLength?: number
+  maxLength?: number
+  min?: number
+  max?: number
+  pattern?: string
+  customMessage?: string
+}
+
+export interface FormBlock {
+  id: string
+  type: FormBlockType
+  label: string
+  required: boolean
+  placeholder?: string
+  helpText?: string
+  options?: FormBlockOption[]
+  validation?: FormBlockValidation
+  width?: "full" | "half" | "third"
+  settings?: Record<string, unknown>
+  conditionalRules?: ConditionalRule[]
+}
+
+export interface FormTheme {
+  primaryColor: string
+  backgroundColor: string
+  textColor: string
+  fontFamily: string
+  borderRadius: string
+  hideBrandBadge: boolean
+}
+
+export interface FormSettings {
+  submitButtonText: string
+  successMessage: string
+  successRedirectUrl?: string
+  requireEmail: boolean
+  allowMultipleSubmissions: boolean
+  closeDate?: string
+  password?: string
+  customCss?: string
+  webhookUrl?: string
+  notifyEmail?: string
+  theme: FormTheme
+}
+
+export interface Form {
+  id: string
+  title: string
+  description: string
+  slug: string
+  blocks: FormBlock[]
+  settings: FormSettings
+  status: "draft" | "published" | "closed"
+  responsesCount: number
+  viewsCount: number
+  completionRate: number
+  createdBy: string
+  createdAt: string
+  updatedAt: string
+  publishedAt?: string
+}
+
+export interface FormResponse {
+  id: string
+  formId: string
+  respondentEmail?: string
+  respondentName?: string
+  answers: Record<string, unknown>
+  metadata?: {
+    userAgent?: string
+    ipAddress?: string
+    device?: string
+    browser?: string
+    country?: string
+  }
+  status: "submitted" | "viewed" | "flagged"
+  submittedAt: string
+}
+
+export interface FormView {
+  id: string
+  formId: string
+  viewedAt: string
+  metadata?: Record<string, unknown>
+}
+
+// ============================================================
+// OTHER TYPES
+// ============================================================
+
 export type UserRole =
-  | "ceo"
-  | "cto"
-  | "clo"
-  | "cco"
-  | "cpo"
-  | "coo"
-  | "admin"
-  | "mentor"
-  | "instructor"
-  | "organizer"
-  | "community_leader"
-  | "student"
-  | "alumni"
-  | "partner"
+  | "ceo" | "cto" | "clo" | "cco" | "cpo" | "coo"
+  | "admin" | "mentor" | "instructor" | "organizer"
+  | "community_leader" | "student" | "alumni" | "partner"
 
 export interface User {
   id: string
@@ -22,149 +140,6 @@ export interface User {
   role: UserRole
   createdAt: string
   updatedAt: string
-}
-
-export interface Student extends User {
-  role: "student"
-  college?: string
-  skills: string[]
-  interests: string[]
-  github?: string
-  linkedin?: string
-  portfolio?: string
-  communityScore: number
-}
-
-export interface Mentor extends User {
-  role: "mentor"
-  assignedStudents: string[]
-  expertise: string[]
-}
-
-export interface Event {
-  id: string
-  title: string
-  description: string
-  date: string
-  time: string
-  location?: string
-  isOnline: boolean
-  maxParticipants?: number
-  registrations: number
-  status: "draft" | "published" | "ongoing" | "completed" | "cancelled"
-  createdBy: string
-  createdAt: string
-}
-
-export interface Course {
-  id: string
-  title: string
-  description: string
-  modules: Module[]
-  duration: string
-  level: "beginner" | "intermediate" | "advanced"
-  enrolledStudents: number
-  createdBy: string
-}
-
-export interface Module {
-  id: string
-  title: string
-  lessons: Lesson[]
-  order: number
-}
-
-export interface Lesson {
-  id: string
-  title: string
-  type: "video" | "text" | "quiz" | "assignment"
-  content: string
-  duration?: string
-  order: number
-}
-
-export interface Project {
-  id: string
-  title: string
-  description: string
-  teamMembers: string[]
-  mentor?: string
-  techStack: string[]
-  status: "draft" | "in_progress" | "review" | "completed" | "featured"
-  github?: string
-  demoVideo?: string
-  progress: number
-  createdAt: string
-}
-
-export interface Certificate {
-  id: string
-  studentId: string
-  eventId?: string
-  courseId?: string
-  projectId?: string
-  title: string
-  issuedAt: string
-  verificationCode: string
-  templateId: string
-}
-
-export interface Form {
-  id: string
-  title: string
-  description?: string
-  blocks: FormBlock[]
-  status: "draft" | "published" | "closed"
-  createdBy: string
-  responses: number
-  createdAt: string
-  updatedAt: string
-}
-
-export interface FormBlock {
-  id: string
-  type: string
-  label: string
-  required: boolean
-  placeholder?: string
-  options?: string[]
-  validation?: Record<string, unknown>
-}
-
-export interface Community {
-  id: string
-  name: string
-  description: string
-  icon?: string
-  members: number
-  channels: Channel[]
-  createdBy: string
-}
-
-export interface Channel {
-  id: string
-  name: string
-  type: "announcement" | "discussion" | "resource"
-  messages: Message[]
-}
-
-export interface Message {
-  id: string
-  content: string
-  author: string
-  createdAt: string
-  reactions?: Record<string, string[]>
-}
-
-export interface DashboardStats {
-  totalStudents: number
-  activeMentors: number
-  totalEvents: number
-  totalCourses: number
-  totalProjects: number
-  totalCertificates: number
-  revenue: number
-  growth: number
 }
 
 export interface NavigationItem {
@@ -183,4 +158,17 @@ export interface Notification {
   read: boolean
   createdAt: string
   actionUrl?: string
+}
+
+export interface DashboardStats {
+  totalStudents: number
+  activeMentors: number
+  totalEvents: number
+  totalCourses: number
+  totalProjects: number
+  totalCertificates: number
+  totalForms: number
+  totalResponses: number
+  revenue: number
+  growth: number
 }

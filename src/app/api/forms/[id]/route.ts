@@ -1,81 +1,65 @@
-import { NextRequest, NextResponse } from "next/server"
-import { formsDB } from "@/lib/db/mock-data"
+import { createClient } from "@/lib/supabase/server"
+import { NextResponse } from "next/server"
 
-// GET /api/forms/[id] - Get a specific form
 export async function GET(
-  request: NextRequest,
+  request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  try {
-    const { id } = await params
-    const form = await formsDB.getById(id)
+  const { id } = await params
+  const supabase = await createClient()
 
-    if (!form) {
-      return NextResponse.json(
-        { success: false, error: "Form not found" },
-        { status: 404 }
-      )
-    }
+  const { data, error } = await supabase
+    .from("forms")
+    .select("*")
+    .eq("id", id)
+    .single()
 
-    return NextResponse.json({ success: true, data: form })
-  } catch (error) {
-    return NextResponse.json(
-      { success: false, error: "Failed to fetch form" },
-      { status: 500 }
-    )
-  }
+  if (error) return NextResponse.json({ error: error.message }, { status: 404 })
+  return NextResponse.json(data)
 }
 
-// PUT /api/forms/[id] - Update a specific form
-export async function PUT(
-  request: NextRequest,
+export async function PATCH(
+  request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  try {
-    const { id } = await params
-    const body = await request.json()
-    const updatedForm = await formsDB.update(id, {
-      ...body,
-      updatedAt: new Date().toISOString(),
-    })
+  const { id } = await params
+  const supabase = await createClient()
+  const body = await request.json()
 
-    if (!updatedForm) {
-      return NextResponse.json(
-        { success: false, error: "Form not found" },
-        { status: 404 }
-      )
-    }
+  const updates: Record<string, unknown> = { updated_at: new Date().toISOString() }
 
-    return NextResponse.json({ success: true, data: updatedForm })
-  } catch (error) {
-    return NextResponse.json(
-      { success: false, error: "Failed to update form" },
-      { status: 500 }
-    )
+  if (body.title !== undefined) updates.title = body.title
+  if (body.description !== undefined) updates.description = body.description
+  if (body.blocks !== undefined) updates.blocks = body.blocks
+  if (body.settings !== undefined) updates.settings = body.settings
+  if (body.status !== undefined) {
+    updates.status = body.status
+    if (body.status === "published") updates.published_at = new Date().toISOString()
   }
+
+  const { data, error } = await supabase
+    .from("forms")
+    .update(updates)
+    .eq("id", id)
+    .select()
+    .single()
+
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  return NextResponse.json(data)
 }
 
-// DELETE /api/forms/[id] - Delete a specific form
 export async function DELETE(
-  request: NextRequest,
+  request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  try {
-    const { id } = await params
-    const deleted = await formsDB.delete(id)
+  const { id } = await params
+  const supabase = await createClient()
 
-    if (!deleted) {
-      return NextResponse.json(
-        { success: false, error: "Form not found" },
-        { status: 404 }
-      )
-    }
+  const { error } = await supabase
+    .from("forms")
+    .delete()
+    .eq("id", id)
 
-    return NextResponse.json({ success: true, message: "Form deleted" })
-  } catch (error) {
-    return NextResponse.json(
-      { success: false, error: "Failed to delete form" },
-      { status: 500 }
-    )
-  }
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  return NextResponse.json({ success: true })
 }
