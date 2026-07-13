@@ -1,55 +1,96 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import { AppLayout } from "@/components/layout/AppLayout"
-import { Rocket, Users, Clock, CheckCircle2, Search, Plus, MapPin, Briefcase, Calendar } from "lucide-react"
+import { Users, Plus, Search, Calendar, ArrowUpRight } from "lucide-react"
 import { cn } from "@/lib/utils"
 
-interface Fellowship { id: string; title: string; company: string; duration: string; stipend: string; location: string; applicants: number; maxSlots: number; status: "open" | "closing-soon" | "closed"; skills: string[] }
+interface Fellowship {
+  id: string
+  title: string
+  description: string
+  duration: string
+  max_participants: number
+  registrations: number
+  status: string
+  start_date: string
+}
 
-const fellowships: Fellowship[] = [
-  { id: "1", title: "Software Engineering Fellow", company: "TechCorp India", duration: "6 months", stipend: "₹25K/mo", location: "Bangalore", applicants: 45, maxSlots: 5, status: "open", skills: ["React", "Node.js"] },
-  { id: "2", title: "Data Science Intern", company: "DataFlow Analytics", duration: "3 months", stipend: "₹20K/mo", location: "Remote", applicants: 78, maxSlots: 8, status: "open", skills: ["Python", "ML"] },
-  { id: "3", title: "UI/UX Design Fellow", company: "DesignStudio", duration: "4 months", stipend: "₹18K/mo", location: "Mumbai", applicants: 32, maxSlots: 3, status: "closing-soon", skills: ["Figma", "UI Design"] },
-]
+export default function FellowshipsPage() {
+  const [fellowships, setFellowships] = useState<Fellowship[]>([])
+  const [loading, setLoading] = useState(true)
+  const [searchQuery, setSearchQuery] = useState("")
 
-const getStatusStyle = (s: string) => { switch (s) { case "open": return "bg-[#6B8E6B]/15 text-[#5A7A5A]"; case "closing-soon": return "bg-[#B8860B]/15 text-[#B8860B]"; default: return "bg-[#999]/15 text-[#888]" } }
+  useEffect(() => {
+    // Use courses as fellowships source (filtered by category or use a separate table)
+    // For now, show published courses with fellowship-like metadata
+    fetch("/api/courses")
+      .then((r) => r.json())
+      .then((data) => setFellowships((data || []).map((c: Record<string, unknown>) => ({
+        id: c.id as string,
+        title: c.title as string,
+        description: (c.description || c.short_description || "") as string,
+        duration: (c.duration || "") as string,
+        max_participants: 0,
+        registrations: (c.enrolled_students as number) || 0,
+        status: (c.status as string) || "draft",
+        start_date: c.created_at as string,
+      }))))
+      .finally(() => setLoading(false))
+  }, [])
 
-export default function LearningFellowshipsPage() {
-  const [search, setSearch] = useState("")
-  const filtered = fellowships.filter((f) => f.title.toLowerCase().includes(search.toLowerCase()))
+  const filtered = fellowships.filter((f) => f.title?.toLowerCase().includes(searchQuery.toLowerCase()))
 
   return (
     <AppLayout>
-      <div className="space-y-8 animate-fadeIn">
+      <div className="space-y-6">
         <div className="flex items-center justify-between">
-          <div><h1 className="text-3xl font-bold text-[#2D2D2D]">Fellowships</h1><p className="mt-1 text-[#6B6B6B]">Career-launching opportunities for students</p></div>
-          <Link href="/learning/fellowships" className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#D4764E] to-[#E8956A] px-5 py-2.5 text-sm font-medium text-white shadow-md shadow-[#D4764E]/25 transition-all hover:shadow-lg"><Plus className="h-4 w-4" />Post Fellowship</Link>
+          <div>
+            <h1 className="text-3xl font-bold text-[var(--foreground)]">Fellowships</h1>
+            <p className="text-[var(--muted-foreground)]">Structured cohort-based learning programs</p>
+          </div>
+          <Link href="/learning/courses/create" className="inline-flex items-center gap-2 rounded-xl bg-[var(--primary)] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[var(--primary)]/90 transition-all">
+            <Plus className="h-4 w-4" /> Post Fellowship
+          </Link>
         </div>
-        <div className="glass-card rounded-2xl border border-[#E8E0D4] bg-white p-4">
-          <div className="relative max-w-md"><Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#999]" /><input type="text" placeholder="Search fellowships..." value={search} onChange={(e) => setSearch(e.target.value)} className="w-full rounded-xl border border-[#E8E0D4] bg-[#FAF8F5] py-2.5 pl-10 pr-4 text-sm text-[#2D2D2D] placeholder:text-[#999] focus:border-[#D4764E] focus:outline-none focus:ring-1 focus:ring-[#D4764E]" /></div>
+
+        <div className="card-premium p-4">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[var(--muted-foreground)]" />
+            <input type="text" placeholder="Search fellowships..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full rounded-xl border border-[var(--border)] bg-[var(--background)] py-2.5 pl-10 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/30" />
+          </div>
         </div>
-        <div className="space-y-4">
-          {filtered.map((f, i) => (
-            <div key={f.id} className="glass-card rounded-2xl border border-[#E8E0D4] bg-white p-6 transition-all duration-300 hover:border-[#D4764E]/30 hover:shadow-lg hover:shadow-[#D4764E]/5" style={{ animationDelay: `${i * 50}ms` }}>
-              <div className="flex items-start justify-between">
-                <div>
-                  <div className="flex items-center gap-3"><h3 className="text-lg font-semibold text-[#2D2D2D]">{f.title}</h3><span className={cn("rounded-full px-2.5 py-0.5 text-xs font-medium", getStatusStyle(f.status))}>{f.status}</span></div>
-                  <p className="mt-1 text-sm text-[#6B6B6B]">{f.company}</p>
-                  <div className="mt-3 flex flex-wrap items-center gap-4 text-xs text-[#999]">
-                    <span className="flex items-center gap-1"><Calendar className="h-3.5 w-3.5" />{f.duration}</span>
-                    <span className="flex items-center gap-1"><MapPin className="h-3.5 w-3.5" />{f.location}</span>
-                    <span className="flex items-center gap-1"><Briefcase className="h-3.5 w-3.5" />{f.stipend}</span>
-                    <span className="flex items-center gap-1"><Users className="h-3.5 w-3.5" />{f.applicants}/{f.maxSlots}</span>
-                  </div>
-                  <div className="mt-3 flex flex-wrap gap-2">{f.skills.map((s) => (<span key={s} className="rounded-full bg-[#D4764E]/10 px-2.5 py-0.5 text-xs font-medium text-[#C06540]">{s}</span>))}</div>
+
+        {loading ? (
+          <div className="space-y-4">{[1, 2].map((i) => <div key={i} className="card-premium p-5 animate-pulse h-24" />)}</div>
+        ) : filtered.length === 0 ? (
+          <div className="card-premium p-12 text-center">
+            <Users className="mx-auto h-12 w-12 text-[var(--muted-foreground)] mb-4" />
+            <h3 className="text-lg font-semibold mb-2">No fellowships yet</h3>
+            <p className="text-sm text-[var(--muted-foreground)]">Create a course to get started</p>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {filtered.map((f) => (
+              <Link key={f.id} href={`/learning/courses/${f.id}`} className="card-premium p-5 flex items-center gap-5 hover:shadow-md transition-all group">
+                <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-br from-purple-500 to-purple-600 text-white shrink-0">
+                  <Users className="h-6 w-6" />
                 </div>
-                <button className="rounded-xl border border-[#E8E0D4] bg-[#FAF8F5] px-4 py-2 text-sm font-medium text-[#2D2D2D] transition-all hover:border-[#D4764E]/30 hover:bg-[#D4764E]/10 hover:text-[#D4764E]">Apply</button>
-              </div>
-            </div>
-          ))}
-        </div>
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-semibold text-[var(--foreground)] truncate">{f.title}</h3>
+                  <p className="text-sm text-[var(--muted-foreground)] truncate">{f.description || "No description"}</p>
+                  <div className="flex items-center gap-4 text-xs text-[var(--muted-foreground)] mt-1">
+                    {f.duration && <span className="flex items-center gap-1"><Calendar className="h-3.5 w-3.5" /> {f.duration}</span>}
+                    <span>{f.registrations} enrolled</span>
+                  </div>
+                </div>
+                <ArrowUpRight className="h-5 w-5 text-[var(--muted-foreground)] group-hover:text-[var(--primary)] transition-colors shrink-0" />
+              </Link>
+            ))}
+          </div>
+        )}
       </div>
     </AppLayout>
   )

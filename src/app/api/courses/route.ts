@@ -11,3 +11,26 @@ export async function GET() {
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   return NextResponse.json(data)
 }
+
+export async function POST(request: Request) {
+  const supabase = await createClient()
+  const body = await request.json()
+
+  const { data, error } = await supabase
+    .from("courses")
+    .insert({
+      title: body.title,
+      description: body.description,
+      short_description: body.short_description,
+      category: body.category,
+      level: body.level || "beginner",
+      duration: body.duration,
+      price: body.price || 0,
+      status: "draft",
+    })
+    .select()
+    .single()
+
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  return NextResponse.json(data, { status: 201 })
+}
