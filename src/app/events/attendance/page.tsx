@@ -1,46 +1,154 @@
 "use client"
 
+import { useState, useEffect } from "react"
 import { AppLayout } from "@/components/layout/AppLayout"
-import { Calendar, CheckCircle2, XCircle, Clock, Users, Search } from "lucide-react"
+import { UserCheck, Search, Calendar, TrendingUp } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { useState } from "react"
 
-const attendance = [
-  { id: "1", event: "AI Workshop", date: "Jan 15, 2025", present: 42, absent: 3, total: 45 },
-  { id: "2", event: "Web Dev Bootcamp", date: "Jan 10, 2025", present: 30, absent: 2, total: 32 },
-  { id: "3", event: "Cybersecurity Seminar", date: "Jan 5, 2025", present: 25, absent: 3, total: 28 },
-]
+interface AttendanceRecord {
+  id: string
+  event_id: string
+  event_title: string
+  event_date: string
+  user_name: string
+  user_email: string
+  checked_in_at: string
+}
 
 export default function AttendancePage() {
+  const [records, setRecords] = useState<AttendanceRecord[]>([])
+  const [loading, setLoading] = useState(true)
+  const [searchQuery, setSearchQuery] = useState("")
+
+  useEffect(() => {
+    fetchAttendance()
+  }, [])
+
+  const fetchAttendance = async () => {
+    setLoading(true)
+    try {
+      const eventsRes = await fetch("/api/events")
+      const events = await eventsRes.json()
+      const allRecords: AttendanceRecord[] = []
+      for (const event of events || []) {
+        const regRes = await fetch(`/api/events/${event.id}/registrations`)
+        if (regRes.ok) {
+          const regs = await regRes.json()
+          for (const reg of regs || []) {
+            if (reg.checked_in) {
+              allRecords.push({
+                id: reg.id,
+                event_id: event.id,
+                event_title: event.title,
+                event_date: event.date,
+                user_name: reg.user?.name || "Unknown",
+                user_email: reg.user?.email || "",
+                checked_in_at: reg.checked_in_at,
+              })
+            }
+          }
+        }
+      }
+      setRecords(allRecords)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const filtered = records.filter((r) => {
+    const q = searchQuery.toLowerCase()
+    return r.user_name.toLowerCase().includes(q) || r.user_email.toLowerCase().includes(q) || r.event_title.toLowerCase().includes(q)
+  })
+
+  const totalEvents = new Set(records.map((r) => r.event_id)).size
+  const totalStudents = new Set(records.map((r) => r.user_email)).size
+  const avgAttendance = totalEvents > 0 ? Math.round(records.length / totalEvents) : 0
+
   return (
     <AppLayout>
-      <div className="space-y-8 animate-fadeIn">
+      <div className="space-y-6">
         <div>
-          <h1 className="text-3xl font-bold text-[#2D2D2D]">Attendance</h1>
-          <p className="mt-1 text-[#6B6B6B]">Track event attendance and participation</p>
+          <h1 className="text-3xl font-bold text-[var(--foreground)]">Attendance</h1>
+          <p className="text-[var(--muted-foreground)]">Track who attended which events</p>
         </div>
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {attendance.map((a, i) => (
-            <div key={a.id} className="glass-card rounded-2xl border border-[#E8E0D4] bg-white p-6 transition-all duration-300 hover:border-[#D4764E]/30 hover:shadow-lg hover:shadow-[#D4764E]/5" style={{ animationDelay: `${i * 60}ms` }}>
-              <h3 className="mb-2 text-lg font-semibold text-[#2D2D2D]">{a.event}</h3>
-              <p className="mb-4 text-sm text-[#999]">{a.date}</p>
-              <div className="grid grid-cols-3 gap-4 text-center">
-                <div className="rounded-xl bg-[#6B8E6B]/10 p-3"><p className="text-xl font-bold text-[#5A7A5A]">{a.present}</p><p className="text-xs text-[#999]">Present</p></div>
-                <div className="rounded-xl bg-[#D4764E]/10 p-3"><p className="text-xl font-bold text-[#C06540]">{a.absent}</p><p className="text-xs text-[#999]">Absent</p></div>
-                <div className="rounded-xl bg-[#FAF8F5] p-3"><p className="text-xl font-bold text-[#2D2D2D]">{a.total}</p><p className="text-xs text-[#999]">Total</p></div>
-              </div>
-              <div className="mt-4">
-                <div className="mb-1 flex items-center justify-between text-xs text-[#999]">
-                  <span>Attendance Rate</span>
-                  <span>{Math.round((a.present / a.total) * 100)}%</span>
+
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          {[
+            { label: "Total Attendees", value: records.length, icon: UserCheck, color: "from-green-500 to-green-600" },
+            { label: "Unique Students", value: totalStudents, icon: TrendingUp, color: "from-blue-500 to-blue-600" },
+            { label: "Avg per Event", value: avgAttendance, icon: Calendar, color: "from-purple-500 to-purple-600" },
+          ].map((stat) => (
+            <div key={stat.label} className="card-premium p-5">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-[var(--muted-foreground)]">{stat.label}</p>
+                  <p className="text-2xl font-bold text-[var(--foreground)]">{stat.value}</p>
                 </div>
-                <div className="h-2 overflow-hidden rounded-full bg-[#F0EBE3]">
-                  <div className="h-full rounded-full bg-gradient-to-r from-[#6B8E6B] to-[#8CB88C]" style={{ width: `${(a.present / a.total) * 100}%` }} />
+                <div className={cn("flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br text-white", stat.color)}>
+                  <stat.icon className="h-5 w-5" />
                 </div>
               </div>
             </div>
           ))}
         </div>
+
+        <div className="card-premium p-4">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[var(--muted-foreground)]" />
+            <input
+              type="text"
+              placeholder="Search attendance records..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full rounded-xl border border-[var(--border)] bg-[var(--background)] py-2.5 pl-10 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/30"
+            />
+          </div>
+        </div>
+
+        {loading ? (
+          <div className="card-premium p-6 animate-pulse h-40" />
+        ) : filtered.length === 0 ? (
+          <div className="card-premium p-12 text-center">
+            <UserCheck className="mx-auto h-12 w-12 text-[var(--muted-foreground)] mb-4" />
+            <h3 className="text-lg font-semibold mb-2">No attendance records</h3>
+            <p className="text-sm text-[var(--muted-foreground)]">No one has checked in to any events yet</p>
+          </div>
+        ) : (
+          <div className="card-premium overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-sm">
+                <thead>
+                  <tr className="border-b border-[var(--border)]">
+                    <th className="px-4 py-3 font-medium text-[var(--muted-foreground)]">Student</th>
+                    <th className="px-4 py-3 font-medium text-[var(--muted-foreground)]">Event</th>
+                    <th className="px-4 py-3 font-medium text-[var(--muted-foreground)]">Event Date</th>
+                    <th className="px-4 py-3 font-medium text-[var(--muted-foreground)]">Checked In</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filtered.map((rec) => (
+                    <tr key={rec.id} className="border-b border-[var(--border)] hover:bg-[var(--muted)]/50 transition-colors">
+                      <td className="px-4 py-3">
+                        <div className="font-medium text-[var(--foreground)]">{rec.user_name}</div>
+                        <div className="text-xs text-[var(--muted-foreground)]">{rec.user_email}</div>
+                      </td>
+                      <td className="px-4 py-3 text-[var(--foreground)]">{rec.event_title}</td>
+                      <td className="px-4 py-3 text-[var(--muted-foreground)]">
+                        {new Date(rec.event_date).toLocaleDateString()}
+                      </td>
+                      <td className="px-4 py-3">
+                        <span className="inline-flex items-center gap-1.5 text-xs text-green-600 font-medium">
+                          <span className="h-2 w-2 rounded-full bg-green-500" />
+                          {new Date(rec.checked_in_at).toLocaleTimeString()}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
       </div>
     </AppLayout>
   )

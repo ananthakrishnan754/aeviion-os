@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import { AppLayout } from "@/components/layout/AppLayout"
 import {
@@ -11,11 +11,14 @@ import {
   Plus,
   Search,
   Eye,
-  Edit,
-  QrCode,
+  Trash2,
   TrendingUp,
   ArrowUpRight,
-  Download,
+  Filter,
+  Grid3X3,
+  List,
+  Globe,
+  MapPinned,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
@@ -24,282 +27,340 @@ interface Event {
   title: string
   description: string
   date: string
+  end_date?: string
   time: string
   location: string
-  isOnline: boolean
-  maxParticipants: number
+  is_online: boolean
+  meeting_url?: string
+  max_participants: number | null
   registrations: number
-  status: "draft" | "published" | "ongoing" | "completed" | "cancelled"
-  type: "workshop" | "bootcamp" | "seminar" | "meetup" | "hackathon"
+  attendance: number
+  status: string
+  type: string
+  thumbnail?: string
+  created_at: string
 }
 
-const mockEvents: Event[] = [
-  {
-    id: "1",
-    title: "AI & Machine Learning Workshop",
-    description: "Hands-on workshop covering ML fundamentals, neural networks, and practical applications.",
-    date: "2025-01-15",
-    time: "10:00 AM - 4:00 PM",
-    location: "Online (Zoom)",
-    isOnline: true,
-    maxParticipants: 50,
-    registrations: 45,
-    status: "published",
-    type: "workshop",
-  },
-  {
-    id: "2",
-    title: "Full Stack Web Development Bootcamp",
-    description: "Intensive 5-day bootcamp covering React, Node.js, databases, and deployment.",
-    date: "2025-01-20",
-    time: "9:00 AM - 5:00 PM",
-    location: "Tech Hub, Bangalore",
-    isOnline: false,
-    maxParticipants: 40,
-    registrations: 32,
-    status: "published",
-    type: "bootcamp",
-  },
-  {
-    id: "3",
-    title: "Cybersecurity Essentials Seminar",
-    description: "Learn about ethical hacking, network security, and protection strategies.",
-    date: "2025-01-25",
-    time: "2:00 PM - 5:00 PM",
-    location: "Online (Google Meet)",
-    isOnline: true,
-    maxParticipants: 30,
-    registrations: 28,
-    status: "published",
-    type: "seminar",
-  },
-  {
-    id: "4",
-    title: "Open Source Contribution Meetup",
-    description: "Connect with open source enthusiasts and contribute to real projects.",
-    date: "2025-02-01",
-    time: "3:00 PM - 6:00 PM",
-    location: "Community Center, Chennai",
-    isOnline: false,
-    maxParticipants: 25,
-    registrations: 18,
-    status: "draft",
-    type: "meetup",
-  },
-  {
-    id: "5",
-    title: "24-Hour Hackathon: Build for Good",
-    description: "Build innovative solutions for social impact in 24 hours.",
-    date: "2025-02-10",
-    time: "All Day",
-    location: "Tech Campus, Hyderabad",
-    isOnline: false,
-    maxParticipants: 100,
-    registrations: 67,
-    status: "published",
-    type: "hackathon",
-  },
-]
+const typeColors: Record<string, string> = {
+  workshop: "bg-blue-100 text-blue-700",
+  bootcamp: "bg-purple-100 text-purple-700",
+  seminar: "bg-green-100 text-green-700",
+  meetup: "bg-orange-100 text-orange-700",
+  hackathon: "bg-red-100 text-red-700",
+}
 
-const stats = [
-  { title: "Total Events", value: "24", change: "+8%", icon: Calendar, color: "from-[var(--primary)] to-[#C06840]" },
-  { title: "Total Registrations", value: "1,234", change: "+15%", icon: Users, color: "from-[var(--success)] to-[#2D7A4A]" },
-  { title: "Avg. Attendance", value: "85%", change: "+3%", icon: TrendingUp, color: "from-[#9B6DD7] to-[#7B4FB7]" },
-  { title: "Certificates Issued", value: "892", change: "+12%", icon: Download, color: "from-[var(--warning)] to-[#B88030]" },
-]
+const statusColors: Record<string, string> = {
+  draft: "bg-gray-100 text-gray-600",
+  published: "bg-green-100 text-green-700",
+  ongoing: "bg-blue-100 text-blue-700",
+  completed: "bg-purple-100 text-purple-700",
+  cancelled: "bg-red-100 text-red-600",
+}
 
 export default function EventsPage() {
-  const [events] = useState<Event[]>(mockEvents)
+  const [events, setEvents] = useState<Event[]>([])
+  const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState("")
-  const [statusFilter, setStatusFilter] = useState<string>("all")
-  const [typeFilter, setTypeFilter] = useState<string>("all")
+  const [statusFilter, setStatusFilter] = useState("all")
+  const [typeFilter, setTypeFilter] = useState("all")
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
+  const [deleting, setDeleting] = useState<string | null>(null)
 
-  const filteredEvents = events.filter((event) => {
-    const matchesSearch = event.title.toLowerCase().includes(searchQuery.toLowerCase())
-    const matchesStatus = statusFilter === "all" || event.status === statusFilter
-    const matchesType = typeFilter === "all" || event.type === typeFilter
-    return matchesSearch && matchesStatus && matchesType
-  })
+  useEffect(() => {
+    fetchEvents()
+  }, [])
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "draft": return "bg-[var(--muted)] text-[var(--muted-foreground)]"
-      case "published": return "bg-[var(--success-light)] text-[var(--success)]"
-      case "ongoing": return "bg-[var(--info-light)] text-[var(--info)]"
-      case "completed": return "bg-[#F3EEFA] text-[#7B4FB7]"
-      case "cancelled": return "bg-[#FDECEE] text-[var(--destructive)]"
-      default: return "bg-[var(--muted)] text-[var(--muted-foreground)]"
+  const fetchEvents = async () => {
+    setLoading(true)
+    try {
+      const res = await fetch("/api/events")
+      if (res.ok) {
+        const data = await res.json()
+        setEvents(data)
+      }
+    } finally {
+      setLoading(false)
     }
   }
 
-  const getTypeColor = (type: string) => {
-    switch (type) {
-      case "workshop": return "bg-[var(--primary-light)] text-[var(--primary)]"
-      case "bootcamp": return "bg-[#F3EEFA] text-[#7B4FB7]"
-      case "seminar": return "bg-[var(--success-light)] text-[var(--success)]"
-      case "meetup": return "bg-[var(--warning-light)] text-[var(--warning)]"
-      case "hackathon": return "bg-[#FDECEE] text-[var(--destructive)]"
-      default: return "bg-[var(--muted)] text-[var(--muted-foreground)]"
+  const deleteEvent = async (id: string) => {
+    if (!confirm("Delete this event?")) return
+    setDeleting(id)
+    try {
+      const res = await fetch(`/api/events/${id}`, { method: "DELETE" })
+      if (res.ok) {
+        setEvents((prev) => prev.filter((e) => e.id !== id))
+      }
+    } finally {
+      setDeleting(null)
     }
+  }
+
+  const filtered = events.filter((e) => {
+    const matchesSearch = e.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      e.description?.toLowerCase().includes(searchQuery.toLowerCase())
+    const matchesStatus = statusFilter === "all" || e.status === statusFilter
+    const matchesType = typeFilter === "all" || e.type === typeFilter
+    return matchesSearch && matchesStatus && matchesType
+  })
+
+  const totalRegistrations = events.reduce((sum, e) => sum + (e.registrations || 0), 0)
+  const totalAttendance = events.reduce((sum, e) => sum + (e.attendance || 0), 0)
+  const upcomingEvents = events.filter((e) => new Date(e.date) > new Date() && e.status !== "cancelled").length
+
+  const formatDate = (date: string) => {
+    return new Date(date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
   }
 
   return (
     <AppLayout>
       <div className="space-y-6">
         {/* Header */}
-        <div className="flex items-center justify-between animate-slide-up">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-[var(--foreground)]">Events</h1>
-            <p className="text-[var(--foreground-subtle)]">Manage workshops, bootcamps, seminars, and more.</p>
+            <h1 className="text-3xl font-bold text-[var(--foreground)]">Events</h1>
+            <p className="text-[var(--muted-foreground)]">Manage workshops, meetups, and community events</p>
           </div>
-          <Link href="/events/upcoming" className="flex items-center gap-2 rounded-xl bg-[var(--primary)] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[var(--primary-hover)] hover:shadow-lg hover:shadow-[var(--primary)]/20 transition-all">
-            <Plus className="h-4 w-4" />
-            Create Event
+          <Link
+            href="/events/create"
+            className="inline-flex items-center gap-2 rounded-xl bg-[var(--primary)] px-5 py-2.5 text-sm font-semibold text-white shadow-md hover:bg-[var(--primary)]/90 transition-all"
+          >
+            <Plus className="h-4 w-4" /> Create Event
           </Link>
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 stagger-children">
-          {stats.map((stat) => (
-            <div key={stat.title} className="card-premium p-5 group">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {[
+            { label: "Total Events", value: events.length, icon: Calendar, color: "from-blue-500 to-blue-600" },
+            { label: "Upcoming", value: upcomingEvents, icon: Clock, color: "from-green-500 to-green-600" },
+            { label: "Registrations", value: totalRegistrations, icon: Users, color: "from-purple-500 to-purple-600" },
+            { label: "Attendance", value: totalAttendance, icon: TrendingUp, color: "from-orange-500 to-orange-600" },
+          ].map((stat) => (
+            <div key={stat.label} className="card-premium p-5">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-[var(--muted-foreground)]">{stat.title}</p>
+                  <p className="text-sm text-[var(--muted-foreground)]">{stat.label}</p>
                   <p className="text-2xl font-bold text-[var(--foreground)]">{stat.value}</p>
                 </div>
-                <div className={cn("rounded-xl bg-gradient-to-br p-3 text-white shadow-sm", stat.color)}>
+                <div className={cn("flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br text-white", stat.color)}>
                   <stat.icon className="h-5 w-5" />
                 </div>
-              </div>
-              <div className="mt-3 flex items-center gap-1.5">
-                <ArrowUpRight className="h-3.5 w-3.5 text-[var(--success)]" />
-                <span className="text-sm font-semibold text-[var(--success)]">{stat.change}</span>
-                <span className="text-xs text-[var(--muted-foreground)]">vs last month</span>
               </div>
             </div>
           ))}
         </div>
 
         {/* Filters */}
-        <div className="flex flex-wrap items-center gap-3">
-          <div className="relative flex-1">
-            <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--muted-foreground)]" />
-            <input
-              type="text"
-              placeholder="Search events..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full rounded-xl border border-[var(--border)] bg-white py-2.5 pl-10 pr-4 text-sm focus:border-[var(--primary)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 transition-all"
-            />
+        <div className="card-premium p-4">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[var(--muted-foreground)]" />
+              <input
+                type="text"
+                placeholder="Search events..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full rounded-xl border border-[var(--border)] bg-[var(--background)] py-2.5 pl-10 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/30"
+              />
+            </div>
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="rounded-xl border border-[var(--border)] bg-[var(--background)] px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/30"
+            >
+              <option value="all">All Status</option>
+              <option value="draft">Draft</option>
+              <option value="published">Published</option>
+              <option value="ongoing">Ongoing</option>
+              <option value="completed">Completed</option>
+              <option value="cancelled">Cancelled</option>
+            </select>
+            <select
+              value={typeFilter}
+              onChange={(e) => setTypeFilter(e.target.value)}
+              className="rounded-xl border border-[var(--border)] bg-[var(--background)] px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/30"
+            >
+              <option value="all">All Types</option>
+              <option value="workshop">Workshop</option>
+              <option value="bootcamp">Bootcamp</option>
+              <option value="seminar">Seminar</option>
+              <option value="meetup">Meetup</option>
+              <option value="hackathon">Hackathon</option>
+            </select>
+            <div className="flex items-center gap-1 rounded-xl border border-[var(--border)] bg-[var(--background)] p-1">
+              <button
+                onClick={() => setViewMode("grid")}
+                className={cn("rounded-lg p-2 transition-all", viewMode === "grid" ? "bg-[var(--primary)] text-white" : "text-[var(--muted-foreground)] hover:text-[var(--foreground)]")}
+              >
+                <Grid3X3 className="h-4 w-4" />
+              </button>
+              <button
+                onClick={() => setViewMode("list")}
+                className={cn("rounded-lg p-2 transition-all", viewMode === "list" ? "bg-[var(--primary)] text-white" : "text-[var(--muted-foreground)] hover:text-[var(--foreground)]")}
+              >
+                <List className="h-4 w-4" />
+              </button>
+            </div>
           </div>
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="rounded-xl border border-[var(--border)] bg-white px-4 py-2.5 text-sm focus:border-[var(--primary)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 transition-all"
-          >
-            <option value="all">All Status</option>
-            <option value="draft">Draft</option>
-            <option value="published">Published</option>
-            <option value="ongoing">Ongoing</option>
-            <option value="completed">Completed</option>
-          </select>
-          <select
-            value={typeFilter}
-            onChange={(e) => setTypeFilter(e.target.value)}
-            className="rounded-xl border border-[var(--border)] bg-white px-4 py-2.5 text-sm focus:border-[var(--primary)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 transition-all"
-          >
-            <option value="all">All Types</option>
-            <option value="workshop">Workshop</option>
-            <option value="bootcamp">Bootcamp</option>
-            <option value="seminar">Seminar</option>
-            <option value="meetup">Meetup</option>
-            <option value="hackathon">Hackathon</option>
-          </select>
         </div>
 
-        {/* Events grid */}
-        <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3 stagger-children">
-          {filteredEvents.map((event) => (
-            <div key={event.id} className="card-premium overflow-hidden group">
-              {/* Event header */}
-              <div className="p-5">
-                <div className="mb-3 flex items-start justify-between">
+        {/* Events */}
+        {loading ? (
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="card-premium p-5 animate-pulse">
+                <div className="h-4 bg-[var(--muted)] rounded w-1/3 mb-3" />
+                <div className="h-6 bg-[var(--muted)] rounded w-2/3 mb-2" />
+                <div className="h-4 bg-[var(--muted)] rounded w-full mb-4" />
+                <div className="flex gap-2">
+                  <div className="h-6 bg-[var(--muted)] rounded w-16" />
+                  <div className="h-6 bg-[var(--muted)] rounded w-20" />
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : filtered.length === 0 ? (
+          <div className="card-premium p-12 text-center">
+            <Calendar className="mx-auto h-12 w-12 text-[var(--muted-foreground)] mb-4" />
+            <h3 className="text-lg font-semibold text-[var(--foreground)] mb-2">No events found</h3>
+            <p className="text-sm text-[var(--muted-foreground)] mb-4">
+              {searchQuery || statusFilter !== "all" || typeFilter !== "all"
+                ? "Try adjusting your filters"
+                : "Create your first event to get started"}
+            </p>
+            <Link
+              href="/events/create"
+              className="inline-flex items-center gap-2 rounded-xl bg-[var(--primary)] px-4 py-2 text-sm font-semibold text-white hover:bg-[var(--primary)]/90"
+            >
+              <Plus className="h-4 w-4" /> Create Event
+            </Link>
+          </div>
+        ) : viewMode === "grid" ? (
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+            {filtered.map((event) => (
+              <div key={event.id} className="card-premium p-5 hover:shadow-lg transition-all">
+                <div className="flex items-start justify-between mb-3">
                   <div className="flex gap-2">
-                    <span className={cn("rounded-full px-2.5 py-1 text-xs font-semibold", getStatusColor(event.status))}>
-                      {event.status}
-                    </span>
-                    <span className={cn("rounded-full px-2.5 py-1 text-xs font-semibold", getTypeColor(event.type))}>
+                    <span className={cn("inline-flex items-center rounded-lg px-2.5 py-1 text-xs font-medium", typeColors[event.type] || "bg-gray-100 text-gray-600")}>
                       {event.type}
                     </span>
-                  </div>
-                </div>
-
-                <h3 className="mb-2 text-lg font-semibold text-[var(--foreground)] group-hover:text-[var(--primary)] transition-colors">
-                  {event.title}
-                </h3>
-                <p className="mb-4 line-clamp-2 text-sm text-[var(--foreground-subtle)]">
-                  {event.description}
-                </p>
-
-                <div className="space-y-2 text-sm text-[var(--foreground-subtle)]">
-                  <div className="flex items-center gap-2">
-                    <Calendar className="h-4 w-4 text-[var(--muted-foreground)]" />
-                    <span>{new Date(event.date).toLocaleDateString()}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Clock className="h-4 w-4 text-[var(--muted-foreground)]" />
-                    <span>{event.time}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <MapPin className="h-4 w-4 text-[var(--muted-foreground)]" />
-                    <span>{event.location}</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Event footer */}
-              <div className="border-t border-[var(--border)] bg-[var(--background-subtle)] px-5 py-4">
-                <div className="mb-3 flex items-center justify-between">
-                  <div className="flex items-center gap-2 text-sm">
-                    <Users className="h-4 w-4 text-[var(--muted-foreground)]" />
-                    <span className="text-[var(--foreground-subtle)]">
-                      {event.registrations}/{event.maxParticipants} registered
+                    <span className={cn("inline-flex items-center rounded-lg px-2.5 py-1 text-xs font-medium", statusColors[event.status] || "bg-gray-100 text-gray-600")}>
+                      {event.status}
                     </span>
                   </div>
-                  <span className="text-sm font-bold text-[var(--success)]">
-                    {Math.round((event.registrations / event.maxParticipants) * 100)}%
-                  </span>
+                  <div className="flex items-center gap-1">
+                    <button
+                      onClick={() => deleteEvent(event.id)}
+                      disabled={deleting === event.id}
+                      className="rounded-lg p-1.5 text-[var(--muted-foreground)] hover:text-red-500 hover:bg-red-50 transition-all"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </div>
                 </div>
-                <div className="mb-4 h-2 rounded-full bg-[var(--border)]">
-                  <div
-                    className="h-2 rounded-full bg-gradient-to-r from-[var(--primary)] to-[#B85C3A]"
-                    style={{ width: `${(event.registrations / event.maxParticipants) * 100}%` }}
-                  />
+                <h3 className="text-lg font-bold text-[var(--foreground)] mb-2">{event.title}</h3>
+                {event.description && (
+                  <p className="text-sm text-[var(--muted-foreground)] mb-3 line-clamp-2">{event.description}</p>
+                )}
+                <div className="space-y-2 mb-4">
+                  <div className="flex items-center gap-2 text-sm text-[var(--muted-foreground)]">
+                    <Calendar className="h-4 w-4" />
+                    <span>{formatDate(event.date)}</span>
+                    {event.time && <span className="text-[var(--border)]">·</span>}
+                    {event.time && <span>{event.time}</span>}
+                  </div>
+                  <div className="flex items-center gap-2 text-sm text-[var(--muted-foreground)]">
+                    {event.is_online ? <Globe className="h-4 w-4" /> : <MapPinned className="h-4 w-4" />}
+                    <span>{event.location || (event.is_online ? "Online" : "TBA")}</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm text-[var(--muted-foreground)]">
+                    <Users className="h-4 w-4" />
+                    <span>
+                      {event.registrations} registered
+                      {event.max_participants && ` / ${event.max_participants} max`}
+                    </span>
+                  </div>
                 </div>
-
-                <div className="flex gap-2">
-                  <Link href={`/events/upcoming`} className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-[var(--border)] bg-white px-3 py-2 text-sm font-medium text-[var(--foreground-subtle)] hover:bg-[var(--background-subtle)] hover:text-[var(--foreground)] transition-colors">
-                    <Eye className="h-4 w-4" />
-                    View
+                {event.max_participants && (
+                  <div className="w-full h-2 rounded-full bg-[var(--muted)] mb-4">
+                    <div
+                      className="h-full rounded-full bg-gradient-to-r from-[var(--primary)] to-[#B85C3A] transition-all"
+                      style={{ width: `${Math.min((event.registrations / event.max_participants) * 100, 100)}%` }}
+                    />
+                  </div>
+                )}
+                <div className="flex items-center gap-2">
+                  <Link
+                    href={`/events/${event.id}`}
+                    className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl border border-[var(--border)] px-3 py-2 text-sm font-medium text-[var(--foreground)] hover:bg-[var(--muted)] transition-all"
+                  >
+                    <Eye className="h-4 w-4" /> View
                   </Link>
-                  <button className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-[var(--border)] bg-white px-3 py-2 text-sm font-medium text-[var(--foreground-subtle)] hover:bg-[var(--background-subtle)] hover:text-[var(--foreground)] transition-colors">
-                    <Edit className="h-4 w-4" />
-                    Edit
-                  </button>
-                  <button className="flex items-center justify-center rounded-xl border border-[var(--border)] bg-white px-3 py-2 text-[var(--foreground-subtle)] hover:bg-[var(--background-subtle)] hover:text-[var(--foreground)] transition-colors">
-                    <QrCode className="h-4 w-4" />
-                  </button>
+                  <Link
+                    href={`/events/${event.id}/registrations`}
+                    className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl bg-[var(--primary)]/10 px-3 py-2 text-sm font-medium text-[var(--primary)] hover:bg-[var(--primary)]/20 transition-all"
+                  >
+                    <Users className="h-4 w-4" /> Registrations
+                  </Link>
                 </div>
               </div>
+            ))}
+          </div>
+        ) : (
+          <div className="card-premium overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-sm">
+                <thead>
+                  <tr className="border-b border-[var(--border)]">
+                    <th className="px-4 py-3 font-medium text-[var(--muted-foreground)]">Event</th>
+                    <th className="px-4 py-3 font-medium text-[var(--muted-foreground)]">Date</th>
+                    <th className="px-4 py-3 font-medium text-[var(--muted-foreground)]">Type</th>
+                    <th className="px-4 py-3 font-medium text-[var(--muted-foreground)]">Status</th>
+                    <th className="px-4 py-3 font-medium text-[var(--muted-foreground)]">Registrations</th>
+                    <th className="px-4 py-3 font-medium text-[var(--muted-foreground)]">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filtered.map((event) => (
+                    <tr key={event.id} className="border-b border-[var(--border)] hover:bg-[var(--muted)]/50 transition-colors">
+                      <td className="px-4 py-3">
+                        <div className="font-medium text-[var(--foreground)]">{event.title}</div>
+                        <div className="text-xs text-[var(--muted-foreground)]">{event.location || "TBA"}</div>
+                      </td>
+                      <td className="px-4 py-3 text-[var(--muted-foreground)]">{formatDate(event.date)}</td>
+                      <td className="px-4 py-3">
+                        <span className={cn("inline-flex items-center rounded-lg px-2.5 py-1 text-xs font-medium", typeColors[event.type] || "bg-gray-100 text-gray-600")}>
+                          {event.type}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3">
+                        <span className={cn("inline-flex items-center rounded-lg px-2.5 py-1 text-xs font-medium", statusColors[event.status] || "bg-gray-100 text-gray-600")}>
+                          {event.status}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 text-[var(--muted-foreground)]">
+                        {event.registrations}{event.max_participants ? ` / ${event.max_participants}` : ""}
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="flex items-center gap-1">
+                          <Link href={`/events/${event.id}`} className="rounded-lg p-1.5 text-[var(--muted-foreground)] hover:text-[var(--primary)] hover:bg-[var(--primary)]/10 transition-all">
+                            <Eye className="h-4 w-4" />
+                          </Link>
+                          <button
+                            onClick={() => deleteEvent(event.id)}
+                            disabled={deleting === event.id}
+                            className="rounded-lg p-1.5 text-[var(--muted-foreground)] hover:text-red-500 hover:bg-red-50 transition-all"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
-          ))}
-        </div>
-
-        {filteredEvents.length === 0 && (
-          <div className="card-premium p-12 text-center">
-            <Calendar className="mx-auto h-12 w-12 text-[var(--muted-foreground)]" />
-            <h3 className="mt-4 text-lg font-medium text-[var(--foreground)]">No events found</h3>
-            <p className="mt-2 text-[var(--foreground-subtle)]">Try adjusting your search or filter criteria.</p>
           </div>
         )}
       </div>
