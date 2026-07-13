@@ -1,52 +1,85 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import Link from "next/link"
 import { AppLayout } from "@/components/layout/AppLayout"
-import { FolderOpen, Search, Plus, Star, Eye, Github, ExternalLink } from "lucide-react"
+import { FolderOpen, Search, Star, Github, ExternalLink } from "lucide-react"
 import { cn } from "@/lib/utils"
 
-interface Project { id: string; title: string; description: string; student: string; tags: string[]; stars: number; views: number; image?: string }
+interface Project {
+  id: string
+  title: string
+  description: string
+  tech_stack: string[]
+  category: string
+  github: string
+  demo_url: string
+  status: string
+  featured: boolean
+}
 
-const projects: Project[] = [
-  { id: "1", title: "AI Resume Analyzer", description: "ML-powered resume scoring and improvement suggestions", student: "Alex Kumar", tags: ["Python", "NLP", "ML"], stars: 45, views: 230 },
-  { id: "2", title: "E-Commerce Platform", description: "Full-stack marketplace with payments and admin", student: "Sarah Johnson", tags: ["React", "Node.js", "Stripe"], stars: 38, views: 189 },
-  { id: "3", title: "Real-time Chat App", description: "WebSocket-based messaging with rooms and media", student: "Mike Chen", tags: ["Socket.io", "React", "MongoDB"], stars: 32, views: 156 },
-  { id: "4", title: "Weather Dashboard", description: "Interactive weather maps with 7-day forecasts", student: "Emily Davis", tags: ["React", "API", "Charts"], stars: 28, views: 134 },
-  { id: "5", title: "Task Management CLI", description: "Developer-friendly CLI for project task tracking", student: "Rahul Sharma", tags: ["Go", "CLI", "SQLite"], stars: 24, views: 98 },
-  { id: "6", title: "Blockchain Voting", description: "Transparent voting system on Ethereum testnet", student: "Lisa Wang", tags: ["Solidity", "Web3", "React"], stars: 41, views: 210 },
-]
+export default function GalleryPage() {
+  const [projects, setProjects] = useState<Project[]>([])
+  const [loading, setLoading] = useState(true)
+  const [searchQuery, setSearchQuery] = useState("")
 
-export default function ProjectGalleryPage() {
-  const [search, setSearch] = useState("")
-  const filtered = projects.filter((p) => p.title.toLowerCase().includes(search.toLowerCase()))
+  useEffect(() => {
+    fetch("/api/projects").then((r) => r.json()).then((data) => {
+      setProjects((data || []).filter((p: Project) => p.status === "completed"))
+    }).finally(() => setLoading(false))
+  }, [])
+
+  const filtered = projects.filter((p) => p.title?.toLowerCase().includes(searchQuery.toLowerCase()) || p.description?.toLowerCase().includes(searchQuery.toLowerCase()))
 
   return (
     <AppLayout>
-      <div className="space-y-8 animate-fadeIn">
-        <div className="flex items-center justify-between">
-          <div><h1 className="text-3xl font-bold text-[#2D2D2D]">Project Gallery</h1><p className="mt-1 text-[#6B6B6B]">Showcase of student projects</p></div>
-          <button className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#D4764E] to-[#E8956A] px-5 py-2.5 text-sm font-medium text-white shadow-md shadow-[#D4764E]/25 transition-all hover:shadow-lg"><Plus className="h-4 w-4" />Submit Project</button>
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-3xl font-bold text-[var(--foreground)]">Project Gallery</h1>
+          <p className="text-[var(--muted-foreground)]">Showcase of completed student projects</p>
         </div>
-        <div className="glass-card rounded-2xl border border-[#E8E0D4] bg-white p-4">
-          <div className="relative max-w-md"><Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#999]" /><input type="text" placeholder="Search projects..." value={search} onChange={(e) => setSearch(e.target.value)} className="w-full rounded-xl border border-[#E8E0D4] bg-[#FAF8F5] py-2.5 pl-10 pr-4 text-sm text-[#2D2D2D] placeholder:text-[#999] focus:border-[#D4764E] focus:outline-none focus:ring-1 focus:ring-[#D4764E]" /></div>
+
+        <div className="card-premium p-4">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[var(--muted-foreground)]" />
+            <input type="text" placeholder="Search gallery..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full rounded-xl border border-[var(--border)] bg-[var(--background)] py-2.5 pl-10 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/30" />
+          </div>
         </div>
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {filtered.map((p, i) => (
-            <div key={p.id} className="glass-card overflow-hidden rounded-2xl border border-[#E8E0D4] bg-white transition-all duration-300 hover:border-[#D4764E]/30 hover:shadow-lg hover:shadow-[#D4764E]/5" style={{ animationDelay: `${i * 60}ms` }}>
-              <div className="h-40 bg-gradient-to-br from-[#D4764E]/20 to-[#E8956A]/20 flex items-center justify-center"><FolderOpen className="h-12 w-12 text-[#D4764E]/40" /></div>
-              <div className="p-6">
-                <h3 className="mb-1 text-lg font-semibold text-[#2D2D2D]">{p.title}</h3>
-                <p className="mb-3 text-sm text-[#6B6B6B] line-clamp-2">{p.description}</p>
-                <p className="mb-3 text-xs text-[#999]">by {p.student}</p>
-                <div className="mb-4 flex flex-wrap gap-2">{p.tags.map((t) => (<span key={t} className="rounded-full bg-[#D4764E]/10 px-2.5 py-0.5 text-xs font-medium text-[#C06540]">{t}</span>))}</div>
-                <div className="flex items-center gap-4 text-xs text-[#999]">
-                  <span className="flex items-center gap-1"><Star className="h-3.5 w-3.5 fill-[#B8860B] text-[#B8860B]" />{p.stars}</span>
-                  <span className="flex items-center gap-1"><Eye className="h-3.5 w-3.5" />{p.views}</span>
+
+        {loading ? (
+          <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">{[1, 2, 3].map((i) => <div key={i} className="card-premium p-5 animate-pulse h-56" />)}</div>
+        ) : filtered.length === 0 ? (
+          <div className="card-premium p-12 text-center">
+            <FolderOpen className="mx-auto h-12 w-12 text-[var(--muted-foreground)] mb-4" />
+            <h3 className="text-lg font-semibold mb-2">No projects in gallery</h3>
+            <p className="text-sm text-[var(--muted-foreground)]">Completed projects will appear here</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
+            {filtered.map((p) => (
+              <Link key={p.id} href={`/projects/${p.id}`} className="card-premium p-5 hover:shadow-lg transition-all group">
+                <div className="flex items-start justify-between mb-3">
+                  <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-[var(--primary)] to-[#B85C3A] flex items-center justify-center text-white">
+                    <FolderOpen className="h-5 w-5" />
+                  </div>
+                  {p.featured && <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />}
                 </div>
-              </div>
-            </div>
-          ))}
-        </div>
+                <h3 className="text-lg font-bold text-[var(--foreground)] mb-2 group-hover:text-[var(--primary)] transition-colors">{p.title}</h3>
+                <p className="text-sm text-[var(--muted-foreground)] mb-3 line-clamp-2">{p.description || "No description"}</p>
+                {p.tech_stack?.length > 0 && (
+                  <div className="flex flex-wrap gap-1.5 mb-3">
+                    {p.tech_stack.slice(0, 3).map((t) => <span key={t} className="rounded-md bg-[var(--muted)] px-2 py-0.5 text-xs text-[var(--muted-foreground)]">{t}</span>)}
+                  </div>
+                )}
+                <div className="flex items-center gap-3 text-xs text-[var(--muted-foreground)]">
+                  {p.github && <span className="flex items-center gap-1"><Github className="h-3.5 w-3.5" /> Code</span>}
+                  {p.demo_url && <span className="flex items-center gap-1"><ExternalLink className="h-3.5 w-3.5" /> Live</span>}
+                </div>
+              </Link>
+            ))}
+          </div>
+        )}
       </div>
     </AppLayout>
   )

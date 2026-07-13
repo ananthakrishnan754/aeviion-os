@@ -1,231 +1,183 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import { cn } from "@/lib/utils"
-import {
-  FolderOpen,
-  Plus,
-  Search,
-  ExternalLink,
-  Github,
-  Star,
-  Eye,
-  Users,
-  ArrowUpRight,
-} from "lucide-react"
+import { FolderOpen, Plus, Search, Github, Eye, Trash2, Star, ExternalLink } from "lucide-react"
 import { AppLayout } from "@/components/layout/AppLayout"
 
 interface Project {
   id: string
   title: string
   description: string
-  studentName: string
-  college: string
+  tech_stack: string[]
   category: string
-  tags: string[]
-  githubUrl?: string
-  liveUrl?: string
-  stars: number
-  views: number
-  teamSize: number
-  status: "draft" | "submitted" | "approved" | "featured"
-  createdAt: string
+  github: string
+  demo_url: string
+  status: string
+  progress: number
+  rating: number
+  featured: boolean
+  team_members: string[]
+  created_at: string
 }
 
-const mockProjects: Project[] = [
-  { id: "proj_1", title: "E-Commerce Platform", description: "Full-stack e-commerce solution with React, Node.js, and MongoDB.", studentName: "Alex Kumar", college: "MIT", category: "Web Development", tags: ["React", "Node.js", "MongoDB", "Stripe"], githubUrl: "#", liveUrl: "#", stars: 45, views: 234, teamSize: 2, status: "featured", createdAt: "2025-01-10T10:00:00Z" },
-  { id: "proj_2", title: "AI Image Generator", description: "Deep learning model that generates images from text descriptions.", studentName: "Sarah Johnson", college: "Stanford", category: "Machine Learning", tags: ["Python", "TensorFlow", "FastAPI", "React"], githubUrl: "#", stars: 89, views: 456, teamSize: 3, status: "featured", createdAt: "2025-01-08T10:00:00Z" },
-  { id: "proj_3", title: "Real-time Chat Application", description: "WebSocket-based chat app with rooms, file sharing, and E2E encryption.", studentName: "Mike Chen", college: "UC Berkeley", category: "Web Development", tags: ["Socket.io", "React", "Express", "Redis"], githubUrl: "#", stars: 34, views: 189, teamSize: 1, status: "approved", createdAt: "2025-01-05T10:00:00Z" },
-  { id: "proj_4", title: "Climate Data Dashboard", description: "Interactive dashboard visualizing global climate data with predictive analytics.", studentName: "Emily Davis", college: "Harvard", category: "Data Science", tags: ["Python", "D3.js", "PostgreSQL", "Docker"], liveUrl: "#", stars: 67, views: 345, teamSize: 4, status: "approved", createdAt: "2025-01-03T10:00:00Z" },
-  { id: "proj_5", title: "Mobile Fitness Tracker", description: "Cross-platform mobile app for tracking workouts, nutrition, and health metrics.", studentName: "Rahul Sharma", college: "IIT Delhi", category: "Mobile Development", tags: ["React Native", "Firebase", "HealthKit"], githubUrl: "#", stars: 23, views: 156, teamSize: 2, status: "submitted", createdAt: "2025-01-01T10:00:00Z" },
-  { id: "proj_6", title: "Blockchain Voting System", description: "Decentralized voting application using Ethereum smart contracts.", studentName: "Lisa Wang", college: "Carnegie Mellon", category: "Blockchain", tags: ["Solidity", "React", "Web3.js", "Hardhat"], githubUrl: "#", stars: 56, views: 278, teamSize: 3, status: "featured", createdAt: "2024-12-28T10:00:00Z" },
-]
+const statusColors: Record<string, string> = {
+  draft: "bg-gray-100 text-gray-600",
+  "in-progress": "bg-blue-100 text-blue-700",
+  completed: "bg-green-100 text-green-700",
+  review: "bg-yellow-100 text-yellow-700",
+}
 
 export default function ProjectsPage() {
+  const [projects, setProjects] = useState<Project[]>([])
+  const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState("")
-  const [categoryFilter, setCategoryFilter] = useState<string>("all")
-  const [statusFilter, setStatusFilter] = useState<string>("all")
-  const [sortBy, setSortBy] = useState<"stars" | "views" | "newest">("stars")
+  const [statusFilter, setStatusFilter] = useState("all")
+  const [deleting, setDeleting] = useState<string | null>(null)
 
-  const categories = Array.from(new Set(mockProjects.map((p) => p.category)))
+  useEffect(() => { fetchProjects() }, [])
 
-  const filteredProjects = mockProjects
-    .filter((project) => {
-      const matchesSearch = project.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        project.description.toLowerCase().includes(searchQuery.toLowerCase())
-      const matchesCategory = categoryFilter === "all" || project.category === categoryFilter
-      const matchesStatus = statusFilter === "all" || project.status === statusFilter
-      return matchesSearch && matchesCategory && matchesStatus
-    })
-    .sort((a, b) => {
-      if (sortBy === "stars") return b.stars - a.stars
-      if (sortBy === "views") return b.views - a.views
-      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-    })
-
-  const stats = {
-    total: mockProjects.length,
-    featured: mockProjects.filter((p) => p.status === "featured").length,
-    totalStars: mockProjects.reduce((sum, p) => sum + p.stars, 0),
-    totalViews: mockProjects.reduce((sum, p) => sum + p.views, 0),
+  const fetchProjects = async () => {
+    setLoading(true)
+    try {
+      const res = await fetch("/api/projects")
+      if (res.ok) setProjects(await res.json())
+    } finally { setLoading(false) }
   }
 
-  const statCards = [
-    { label: "Total Projects", value: stats.total, icon: FolderOpen, color: "from-[var(--primary)] to-[#C06840]" },
-    { label: "Total Stars", value: stats.totalStars, icon: Star, color: "from-[var(--warning)] to-[#B88030]" },
-    { label: "Total Views", value: stats.totalViews.toLocaleString(), icon: Eye, color: "from-[#9B6DD7] to-[#7B4FB7]" },
-    { label: "Featured", value: stats.featured, icon: ArrowUpRight, color: "from-[var(--success)] to-[#2D7A4A]" },
-  ]
+  const deleteProject = async (id: string) => {
+    if (!confirm("Delete this project?")) return
+    setDeleting(id)
+    try {
+      const res = await fetch(`/api/projects/${id}`, { method: "DELETE" })
+      if (res.ok) setProjects((prev) => prev.filter((p) => p.id !== id))
+    } finally { setDeleting(null) }
+  }
+
+  const filtered = projects.filter((p) => {
+    const q = searchQuery.toLowerCase()
+    const matchesSearch = p.title?.toLowerCase().includes(q) || p.description?.toLowerCase().includes(q) || p.category?.toLowerCase().includes(q)
+    const matchesStatus = statusFilter === "all" || p.status === statusFilter
+    return matchesSearch && matchesStatus
+  })
+
+  const completed = projects.filter((p) => p.status === "completed").length
+  const featured = projects.filter((p) => p.featured).length
 
   return (
     <AppLayout>
-      <div className="min-h-screen p-6">
-        <div className="mx-auto max-w-7xl">
-          {/* Header */}
-          <div className="mb-8 flex items-center justify-between animate-slide-up">
-            <div>
-              <h1 className="text-2xl font-bold text-[var(--foreground)]">Projects</h1>
-              <p className="mt-1 text-sm text-[var(--foreground-subtle)]">Showcase and manage student projects</p>
+      <div className="space-y-6">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-[var(--foreground)]">Projects</h1>
+            <p className="text-[var(--muted-foreground)]">Student projects, portfolios, and submissions</p>
+          </div>
+          <Link href="/projects/create" className="inline-flex items-center gap-2 rounded-xl bg-[var(--primary)] px-5 py-2.5 text-sm font-semibold text-white shadow-md hover:bg-[var(--primary)]/90 transition-all">
+            <Plus className="h-4 w-4" /> Submit Project
+          </Link>
+        </div>
+
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+          {[
+            { label: "Total Projects", value: projects.length, icon: FolderOpen, color: "from-blue-500 to-blue-600" },
+            { label: "Completed", value: completed, icon: Star, color: "from-green-500 to-green-600" },
+            { label: "Featured", value: featured, icon: Eye, color: "from-purple-500 to-purple-600" },
+          ].map((stat) => (
+            <div key={stat.label} className="card-premium p-5">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-[var(--muted-foreground)]">{stat.label}</p>
+                  <p className="text-2xl font-bold text-[var(--foreground)]">{stat.value}</p>
+                </div>
+                <div className={cn("flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br text-white", stat.color)}>
+                  <stat.icon className="h-5 w-5" />
+                </div>
+              </div>
             </div>
-            <Link
-              href="/projects/gallery"
-              className="flex items-center gap-2 rounded-xl bg-[var(--primary)] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[var(--primary-hover)] hover:shadow-lg hover:shadow-[var(--primary)]/20 transition-all"
-            >
-              <Plus className="h-4 w-4" />
-              Submit Project
+          ))}
+        </div>
+
+        <div className="card-premium p-4">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[var(--muted-foreground)]" />
+              <input type="text" placeholder="Search projects..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full rounded-xl border border-[var(--border)] bg-[var(--background)] py-2.5 pl-10 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/30" />
+            </div>
+            <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="rounded-xl border border-[var(--border)] bg-[var(--background)] px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/30">
+              <option value="all">All Status</option>
+              <option value="draft">Draft</option>
+              <option value="in-progress">In Progress</option>
+              <option value="review">Review</option>
+              <option value="completed">Completed</option>
+            </select>
+          </div>
+        </div>
+
+        {loading ? (
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">{[1, 2, 3].map((i) => <div key={i} className="card-premium p-5 animate-pulse h-48" />)}</div>
+        ) : filtered.length === 0 ? (
+          <div className="card-premium p-12 text-center">
+            <FolderOpen className="mx-auto h-12 w-12 text-[var(--muted-foreground)] mb-4" />
+            <h3 className="text-lg font-semibold mb-2">No projects found</h3>
+            <p className="text-sm text-[var(--muted-foreground)] mb-4">
+              {searchQuery || statusFilter !== "all" ? "Try adjusting filters" : "Submit your first project"}
+            </p>
+            <Link href="/projects/create" className="inline-flex items-center gap-2 rounded-xl bg-[var(--primary)] px-4 py-2 text-sm font-semibold text-white hover:bg-[var(--primary)]/90">
+              <Plus className="h-4 w-4" /> Submit Project
             </Link>
           </div>
-
-          {/* Stats */}
-          <div className="mb-6 grid grid-cols-4 gap-4 stagger-children">
-            {statCards.map((stat) => (
-              <div key={stat.label} className="card-premium p-4">
-                <div className="flex items-center gap-3">
-                  <div className={cn("flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br text-white shadow-sm", stat.color)}>
-                    <stat.icon className="h-5 w-5" />
+        ) : (
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+            {filtered.map((project) => (
+              <div key={project.id} className="card-premium p-5 hover:shadow-lg transition-all">
+                <div className="flex items-start justify-between mb-3">
+                  <div className="flex gap-2">
+                    <span className={cn("inline-flex items-center rounded-lg px-2.5 py-1 text-xs font-medium", statusColors[project.status] || "bg-gray-100 text-gray-600")}>
+                      {project.status}
+                    </span>
+                    {project.featured && <span className="inline-flex items-center rounded-lg px-2.5 py-1 text-xs font-medium bg-yellow-100 text-yellow-700">Featured</span>}
                   </div>
-                  <div>
-                    <p className="text-2xl font-bold text-[var(--foreground)]">{stat.value}</p>
-                    <p className="text-xs text-[var(--muted-foreground)] font-medium">{stat.label}</p>
+                  <button onClick={() => deleteProject(project.id)} disabled={deleting === project.id}
+                    className="rounded-lg p-1.5 text-[var(--muted-foreground)] hover:text-red-500 hover:bg-red-50 transition-all">
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                </div>
+                <h3 className="text-lg font-bold text-[var(--foreground)] mb-2">{project.title}</h3>
+                <p className="text-sm text-[var(--muted-foreground)] mb-3 line-clamp-2">{project.description || "No description"}</p>
+                {project.tech_stack && project.tech_stack.length > 0 && (
+                  <div className="flex flex-wrap gap-1.5 mb-4">
+                    {project.tech_stack.slice(0, 4).map((t) => (
+                      <span key={t} className="rounded-md bg-[var(--muted)] px-2 py-0.5 text-xs text-[var(--muted-foreground)]">{t}</span>
+                    ))}
+                    {project.tech_stack.length > 4 && <span className="text-xs text-[var(--muted-foreground)]">+{project.tech_stack.length - 4}</span>}
                   </div>
+                )}
+                {project.progress > 0 && (
+                  <div className="w-full h-1.5 rounded-full bg-[var(--muted)] mb-4">
+                    <div className="h-full rounded-full bg-gradient-to-r from-[var(--primary)] to-[#B85C3A]" style={{ width: `${project.progress}%` }} />
+                  </div>
+                )}
+                <div className="flex items-center gap-2">
+                  <Link href={`/projects/${project.id}`} className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl border border-[var(--border)] px-3 py-2 text-sm font-medium text-[var(--foreground)] hover:bg-[var(--muted)] transition-all">
+                    <Eye className="h-4 w-4" /> View
+                  </Link>
+                  {project.github && (
+                    <a href={project.github} target="_blank" rel="noopener noreferrer" className="rounded-xl border border-[var(--border)] p-2 text-[var(--muted-foreground)] hover:text-[var(--foreground)] hover:bg-[var(--muted)] transition-all">
+                      <Github className="h-4 w-4" />
+                    </a>
+                  )}
+                  {project.demo_url && (
+                    <a href={project.demo_url} target="_blank" rel="noopener noreferrer" className="rounded-xl border border-[var(--border)] p-2 text-[var(--muted-foreground)] hover:text-[var(--foreground)] hover:bg-[var(--muted)] transition-all">
+                      <ExternalLink className="h-4 w-4" />
+                    </a>
+                  )}
                 </div>
               </div>
             ))}
           </div>
-
-          {/* Filters */}
-          <div className="mb-6 flex items-center gap-3">
-            <div className="relative flex-1 max-w-md">
-              <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--muted-foreground)]" />
-              <input
-                type="text"
-                placeholder="Search projects..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full rounded-xl border border-[var(--border)] bg-white py-2.5 pl-10 pr-4 text-sm focus:border-[var(--primary)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 transition-all"
-              />
-            </div>
-            <select value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value)} className="rounded-xl border border-[var(--border)] bg-white px-4 py-2.5 text-sm focus:border-[var(--primary)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 transition-all">
-              <option value="all">All Categories</option>
-              {categories.map((cat) => <option key={cat} value={cat}>{cat}</option>)}
-            </select>
-            <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="rounded-xl border border-[var(--border)] bg-white px-4 py-2.5 text-sm focus:border-[var(--primary)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 transition-all">
-              <option value="all">All Status</option>
-              <option value="featured">Featured</option>
-              <option value="approved">Approved</option>
-              <option value="submitted">Submitted</option>
-            </select>
-            <select value={sortBy} onChange={(e) => setSortBy(e.target.value as typeof sortBy)} className="rounded-xl border border-[var(--border)] bg-white px-4 py-2.5 text-sm focus:border-[var(--primary)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 transition-all">
-              <option value="stars">Most Stars</option>
-              <option value="views">Most Views</option>
-              <option value="newest">Newest</option>
-            </select>
-          </div>
-
-          {/* Projects Grid */}
-          {filteredProjects.length === 0 ? (
-            <div className="rounded-2xl border-2 border-dashed border-[var(--border)] py-16 text-center">
-              <FolderOpen className="mx-auto h-12 w-12 text-[var(--muted-foreground)]" />
-              <h3 className="mt-4 text-lg font-medium text-[var(--foreground)]">No projects found</h3>
-              <p className="mt-2 text-[var(--foreground-subtle)]">Try adjusting your filters</p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3 stagger-children">
-              {filteredProjects.map((project) => (
-                <div key={project.id} className="card-premium overflow-hidden group">
-                  {/* Project Image Placeholder */}
-                  <div className="h-44 bg-gradient-to-br from-[var(--primary)] to-[#9B6DD7] p-6 flex items-end">
-                    <span className={cn(
-                      "rounded-full px-2.5 py-1 text-xs font-semibold",
-                      project.status === "featured"
-                        ? "bg-[var(--warning)] text-white"
-                        : project.status === "approved"
-                        ? "bg-[var(--success)] text-white"
-                        : project.status === "submitted"
-                        ? "bg-[var(--info)] text-white"
-                        : "bg-[var(--muted)] text-[var(--muted-foreground)]"
-                    )}>
-                      {project.status}
-                    </span>
-                  </div>
-
-                  {/* Content */}
-                  <div className="p-5">
-                    <h3 className="mb-2 text-lg font-semibold text-[var(--foreground)] group-hover:text-[var(--primary)] transition-colors">
-                      {project.title}
-                    </h3>
-                    <p className="mb-4 text-sm text-[var(--foreground-subtle)] line-clamp-2">{project.description}</p>
-
-                    {/* Student Info */}
-                    <div className="mb-4 flex items-center gap-3">
-                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-[var(--primary)] to-[#B85C3A] text-sm font-bold text-white">
-                        {project.studentName.charAt(0)}
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium text-[var(--foreground)]">{project.studentName}</p>
-                        <p className="text-xs text-[var(--muted-foreground)]">{project.college}</p>
-                      </div>
-                    </div>
-
-                    {/* Tags */}
-                    <div className="mb-4 flex flex-wrap gap-1.5">
-                      {project.tags.map((tag, i) => (
-                        <span key={i} className="rounded-full bg-[var(--background-subtle)] px-2.5 py-1 text-xs font-medium text-[var(--foreground-subtle)]">{tag}</span>
-                      ))}
-                    </div>
-
-                    {/* Stats */}
-                    <div className="mb-4 flex items-center gap-4 text-sm text-[var(--muted-foreground)]">
-                      <div className="flex items-center gap-1"><Star className="h-4 w-4" /><span>{project.stars}</span></div>
-                      <div className="flex items-center gap-1"><Eye className="h-4 w-4" /><span>{project.views}</span></div>
-                      <div className="flex items-center gap-1"><Users className="h-4 w-4" /><span>{project.teamSize}</span></div>
-                    </div>
-
-                    {/* Actions */}
-                    <div className="flex items-center gap-2 pt-4 border-t border-[var(--border)]">
-                      {project.githubUrl && (
-                        <a href={project.githubUrl} target="_blank" rel="noopener noreferrer" className="flex-1 flex items-center justify-center gap-2 rounded-xl border border-[var(--border)] px-3 py-2 text-sm font-medium text-[var(--foreground-subtle)] hover:bg-[var(--background-subtle)] hover:text-[var(--foreground)] transition-colors">
-                          <Github className="h-4 w-4" />
-                          Code
-                        </a>
-                      )}
-                      {project.liveUrl && (
-                        <a href={project.liveUrl} target="_blank" rel="noopener noreferrer" className="flex-1 flex items-center justify-center gap-2 rounded-xl border border-[var(--border)] px-3 py-2 text-sm font-medium text-[var(--foreground-subtle)] hover:bg-[var(--background-subtle)] hover:text-[var(--foreground)] transition-colors">
-                          <ExternalLink className="h-4 w-4" />
-                          Live
-                        </a>
-                      )}
-                      <button className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-[var(--primary)] px-3 py-2 text-sm font-semibold text-white hover:bg-[var(--primary-hover)] transition-colors">
-                        View Details
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
+        )}
       </div>
     </AppLayout>
   )
