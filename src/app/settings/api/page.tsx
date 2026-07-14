@@ -1,44 +1,65 @@
 "use client"
 
-import { AppLayout } from "@/components/layout/AppLayout"
-import { Key, Copy, RefreshCw, Eye, EyeOff } from "lucide-react"
 import { useState } from "react"
+import { AppLayout } from "@/components/layout/AppLayout"
+import { Key, Copy, Plus, Trash2, Check } from "lucide-react"
 
-const apiKeys = [
-  { id: "1", name: "Production API Key", key: "aev_prod_••••••••••••••••", created: "Jan 1, 2025", lastUsed: "2 hours ago", status: "active" },
-  { id: "2", name: "Development API Key", key: "aev_dev_••••••••••••••••", created: "Jan 10, 2025", lastUsed: "1 day ago", status: "active" },
-  { id: "3", name: "Webhook Secret", key: "whsec_••••••••••••••••", created: "Jan 15, 2025", lastUsed: "Never", status: "active" },
+interface ApiKey { id: string; name: string; key: string; created: string; lastUsed: string }
+
+const initialKeys: ApiKey[] = [
+  { id: "1", name: "Production API", key: "aev_prod_**************************8f2a", created: "2025-01-10", lastUsed: "2 hours ago" },
+  { id: "2", name: "Development", key: "aev_dev_**************************3b1c", created: "2025-01-05", lastUsed: "5 days ago" },
 ]
 
-export default function APIPage() {
-  const [showKeys, setShowKeys] = useState<Record<string, boolean>>({})
+export default function ApiKeysPage() {
+  const [keys, setKeys] = useState<ApiKey[]>(initialKeys)
+  const [copied, setCopied] = useState<string | null>(null)
+
+  const copyKey = (key: string) => { navigator.clipboard.writeText(key); setCopied(key); setTimeout(() => setCopied(null), 2000) }
+  const deleteKey = (id: string) => { if (confirm("Delete this API key?")) setKeys((prev) => prev.filter((k) => k.id !== id)) }
+  const createKey = () => {
+    const newKey: ApiKey = {
+      id: String(Date.now()),
+      name: `API Key ${keys.length + 1}`,
+      key: `aev_${Math.random().toString(36).slice(2, 6)}_**************************${Math.random().toString(36).slice(2, 6)}`,
+      created: new Date().toISOString().slice(0, 10),
+      lastUsed: "Never",
+    }
+    setKeys((prev) => [...prev, newKey])
+  }
 
   return (
     <AppLayout>
-      <div className="space-y-8 animate-fadeIn">
+      <div className="max-w-3xl mx-auto space-y-6">
         <div className="flex items-center justify-between">
-          <div><h1 className="text-3xl font-bold text-[#2D2D2D]">API Settings</h1><p className="mt-1 text-[#6B6B6B]">Manage API keys and webhooks</p></div>
-          <button className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#D4764E] to-[#E8956A] px-5 py-2.5 text-sm font-medium text-white shadow-md shadow-[#D4764E]/25 transition-all hover:shadow-lg"><Key className="h-4 w-4" />Generate Key</button>
+          <div>
+            <h1 className="text-3xl font-bold text-[var(--foreground)]">API Keys</h1>
+            <p className="text-[var(--muted-foreground)]">Manage programmatic access to the platform</p>
+          </div>
+          <button onClick={createKey} className="inline-flex items-center gap-2 rounded-xl bg-[var(--primary)] px-5 py-2.5 text-sm font-semibold text-white shadow-md hover:bg-[var(--primary)]/90 transition-all">
+            <Plus className="h-4 w-4" /> Create Key
+          </button>
         </div>
-        <div className="space-y-4">
-          {apiKeys.map((k, i) => (
-            <div key={k.id} className="glass-card rounded-2xl border border-[#E8E0D4] bg-white p-6 transition-all duration-300 hover:border-[#D4764E]/30 hover:shadow-lg hover:shadow-[#D4764E]/5" style={{ animationDelay: `${i * 50}ms` }}>
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="font-semibold text-[#2D2D2D]">{k.name}</h3>
-                  <p className="mt-1 font-mono text-sm text-[#6B6B6B]">{k.key}</p>
-                  <div className="mt-2 flex items-center gap-4 text-xs text-[#999]">
-                    <span>Created: {k.created}</span>
-                    <span>Last used: {k.lastUsed}</span>
-                  </div>
-                </div>
-                <div className="flex gap-2">
-                  <button className="rounded-lg border border-[#E8E0D4] bg-[#FAF8F5] px-3 py-2 text-xs font-medium text-[#2D2D2D] transition-all hover:border-[#D4764E]/30 hover:bg-[#D4764E]/10"><Copy className="h-3.5 w-3.5" /></button>
-                  <button className="rounded-lg border border-[#E8E0D4] bg-[#FAF8F5] px-3 py-2 text-xs font-medium text-[#2D2D2D] transition-all hover:border-[#D4764E]/30 hover:bg-[#D4764E]/10"><RefreshCw className="h-3.5 w-3.5" /></button>
-                </div>
+        <div className="space-y-3">
+          {keys.map((k) => (
+            <div key={k.id} className="card-premium p-5 flex items-center gap-4">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[var(--primary)]/10 text-[var(--primary)] shrink-0"><Key className="h-5 w-5" /></div>
+              <div className="flex-1 min-w-0">
+                <p className="font-medium text-[var(--foreground)]">{k.name}</p>
+                <p className="text-xs font-mono text-[var(--muted-foreground)] truncate">{k.key}</p>
+              </div>
+              <div className="text-xs text-[var(--muted-foreground)] shrink-0">Created {k.created}</div>
+              <div className="flex items-center gap-1 shrink-0">
+                <button onClick={() => copyKey(k.key)} className="rounded-lg p-1.5 text-[var(--muted-foreground)] hover:text-[var(--primary)] hover:bg-[var(--primary)]/10 transition-all">
+                  {copied === k.key ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
+                </button>
+                <button onClick={() => deleteKey(k.id)} className="rounded-lg p-1.5 text-[var(--muted-foreground)] hover:text-red-500 hover:bg-red-50 transition-all">
+                  <Trash2 className="h-4 w-4" />
+                </button>
               </div>
             </div>
           ))}
+          {keys.length === 0 && <div className="card-premium p-12 text-center"><Key className="mx-auto h-12 w-12 text-[var(--muted-foreground)] mb-4" /><h3 className="text-lg font-semibold mb-2">No API keys</h3><p className="text-sm text-[var(--muted-foreground)]">Create one to get started</p></div>}
         </div>
       </div>
     </AppLayout>
